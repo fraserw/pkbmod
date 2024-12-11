@@ -13,7 +13,14 @@ import time
 
 from astropy.visualization import ManualInterval, ZScaleInterval
 
-torch.cuda.is_available()
+gpu_available = torch.cuda.is_available()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+if gpu_available:
+    print('Using GPU.')
+else:
+    print('GPU not found. Attempting to use CPU cores.')
+
+
 
 from argparse import ArgumentParser
 import logging
@@ -30,8 +37,8 @@ parser.add_argument('visit', default = '01001')
 parser.add_argument('chip', default = 'nrca1')
 parser.add_argument('--useNegativeWell', default = False, action='store_true')
 parser.add_argument('--saves_path', default = '/arc/projects/jwst-tnos/wesmod_results')
-parser.add_argument('--min_snr', default=6.5, type=float)
-parser.add_argument('--trim_snr', default=7.5, type=float)
+parser.add_argument('--min_snr', default=4.5, type=float)
+parser.add_argument('--trim_snr', default=5.5, type=float)
 parser.add_argument('--n-keep', default=4, type=int)
 parser.add_argument('--clust_dist_lim', default=1.0, type=float)
 parser.add_argument('--clust_min_samp', default=2, type=int)
@@ -108,8 +115,10 @@ np_masks[w] = 0
 np_masks = np.clip(np_masks,0,1) ## masks with 1 are GOOD pixels, 0 are BAD pixels
 
 
-datas = torch.tensor(np_datas).cuda()
-inv_variances = torch.tensor(np_inv_variances).cuda()
+#datas = torch.tensor(np_datas).cuda()
+#inv_variances = torch.tensor(np_inv_variances).cuda()
+datas = torch.tensor(np_datas).to(device)
+inv_variances = torch.tensor(np_inv_variances).to(device)
 
 mjds = np.array(mjds)
 
@@ -120,7 +129,8 @@ ref_im = im_nums[0]
 print('Reference image:', ref_im)
 logging.info('Using reference image '+str(ref_im))
 
-n_im = int(torch.tensor(float(datas.size()[2])).cuda().item())
+#n_im = int(torch.tensor(float(datas.size()[2])).cuda().item())
+n_im = int(torch.tensor(float(datas.size()[2])).to(device).item())
 
 dmjds = mjds-mjds[ref_im_ind]
 
@@ -181,8 +191,10 @@ detections = trim_negative_flux(detections)
 
 ## now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
 apply_brightness_filter = True
-im_datas = functional.pad(torch.tensor(np_datas).cuda(), (khw, khw, khw, khw))
-inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
+#im_datas = functional.pad(torch.tensor(np_datas).cuda(), (khw, khw, khw, khw))
+#inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
+im_datas = functional.pad(torch.tensor(np_datas).to(device), (khw, khw, khw, khw))
+inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw))
 
 
 
@@ -211,7 +223,8 @@ torch.cuda.empty_cache()
 
 
 # now create the stamps
-im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).cuda()
+#im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).cuda()
+im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).to(device)
 del np_masks
 
 
@@ -291,7 +304,8 @@ logging.info(f'Number of sources kept after final SNR trim: {len(clust_detection
 
 
 
-inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
+#inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
+inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw))
 cv[0,0,0] = inv_vars[0,0,0]
 
 

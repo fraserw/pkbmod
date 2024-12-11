@@ -4,6 +4,8 @@ import glob
 import numpy as np, pylab as pyl
 import torch
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 def read_data(visit, warps_dir, variance_trim, bit_mask, var_trim_keyword='BAD', verbose=False):
     """
     Read in all the requesite image data
@@ -56,7 +58,7 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
 
     # spacing sould be ~125 pix per day, which corresponds to roughly 1 pixel in the single epoch start to finish
 
-    spacing = 50.
+    spacing = 65.
     if visit[1]=='1':
         rate_lims = [[-1000., 1000.], [-2000., 2000.]]
         max_rate = 2000
@@ -79,7 +81,7 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
 
     mean_rate = np.mean(plant_rates, axis=0)
 
-    dx,dy = np.meshgrid(np.arange(rate_lims[0][0], rate_lims[0][1]+spacing, spacing), np.arange(rate_lims[1][0], rate_lims[1][1]+125., 125.))
+    dx,dy = np.meshgrid(np.arange(rate_lims[0][0], rate_lims[0][1]+spacing, spacing), np.arange(rate_lims[1][0], rate_lims[1][1]+spacing, spacing))
     (a,b) = dx.shape
     dx,dy = dx.reshape(a*b), dy.reshape(a*b)
 
@@ -116,7 +118,8 @@ def create_kernel(n_im, useNegativeWell=False, useGaussianKernel=False, kernel_w
         #print(gauss)
 
 
-        kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).cuda()
+        #kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).cuda()
+        kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).to(device)
         for ir in range(datas.size()[2]):
             kernel[0,0,ir,:,:] = torch.tensor(np.copy(gauss))
 
@@ -124,7 +127,8 @@ def create_kernel(n_im, useNegativeWell=False, useGaussianKernel=False, kernel_w
         print('Using PSF kernel')
         ## the JWST kernel provided by Bryan is 4x over sampled
         khw = kernel_width//2
-        kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).cuda()
+        #kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).cuda()
+        kernel = torch.tensor(np.zeros((1, 1, n_im, kernel_width, kernel_width),dtype='float32')).to(device)
 
         with fits.open('/arc/projects/jwst-tnos/scripts/NIRCam_A4_PSF.fits') as han:
             over_samp_psf = han[0].data
