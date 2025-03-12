@@ -32,10 +32,25 @@ def read_data(visit, chip, warps_dir, dbimages, variance_trim, bit_mask, verbose
 
     for i in range(len(fits_files)):
         with fits.open(fits_files[i]) as han:
-            
+
             datas.append(han[1].data)
             masks.append(han[2].data)
             variances.append(han[3].data)
+
+            ## testing adding a 100 pixel pad
+            #d = han[1].data
+            #m = han[2].data
+            #v = han[3].data
+            #D = np.zeros(d.shape+np.array([200,200]), dtype=d.dtype)
+            #M = np.zeros(d.shape+np.array([200,200]), dtype=m.dtype)
+            #V = np.zeros(d.shape+np.array([200,200]), dtype=v.dtype)+np.nanmedian(v)
+            #D[100:-100,100:-100] = d
+            #M[100:-100,100:-100] = m
+            #V[100:-100,100:-100] = v
+            #datas.append(D)
+            #masks.append(M)
+            #variances.append(V)
+            
             if i ==0:
                 wcs = WCS(han[1].header)
         ## force a non-RT mask onto the RT data because the RT masks are fucked up
@@ -97,9 +112,7 @@ def get_shift_rates(ref_wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, f
     print(f'Number of planted sources: {len(plant_rates)}')
     
     w = np.where(np.less(plant_rates[:,0]**2+plant_rates[:,1]**2, (24*4.5/0.187)**2))
-    angs = np.arctan2(plant_rates[:,1][w], plant_rates[:,0][w])
-    #W = np.where( np.abs(angs-np.median(angs))>1.75*np.pi)
-    #angs[W] = angs[W]%2*np.pi
+    angs = np.arctan2(plant_rates[:,1][w], plant_rates[:,0][w])%(2*np.pi)
 
 
     min_ang = np.min(angs)
@@ -204,7 +217,6 @@ def get_shift_rates(ref_wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, f
         
     if rots[chip]==0:
         rates *= -1
-
 
     return (rates, plant_rates)
 

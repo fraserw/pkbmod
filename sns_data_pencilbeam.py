@@ -58,7 +58,7 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
 
     # spacing sould be ~125 pix per day, which corresponds to roughly 1 pixel in the single epoch start to finish
 
-    spacing = 65.
+    spacing = 70.
     if visit[1]=='1':
         rate_lims = [[-1000., 1000.], [-2000., 2000.]]
         max_rate = 2000
@@ -69,7 +69,7 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
         rate_lims = [[-1000., 1000.], [-1000., 1000.]]
         max_rate = 1000
 
-    plants_dir = '/arc/projects/jwst-tnos/planted/implants_v3'
+    plants_dir = '/arc/projects/jwst-tnos/planted/implants_v4'
     with open(f'{plants_dir}/implant_converts_epoch{visit[1]}_dither1.csv') as han:
         data = han.readlines()
     plant_rates = []

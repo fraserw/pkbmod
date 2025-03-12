@@ -60,8 +60,10 @@ def read_data(date, chip, warps_dir, variance_trim, bit_mask, verbose=False, var
         variances[-1][w] = np.nan
         datas[-1][w] = 0.0
         nan_med_variance = np.nanmedian(variances[-1])
-        print(mjds[-1], fits_files[-1], nan_med_variance)
+        print(mjds[-1], fits_files[i], nan_med_variance)
         if np.isnan(nan_med_variance):
+            print('Skipping image due to nans.')
+            print()
             datas = datas[:-1]
             masks = masks[:-1]
             variances = variances[:-1]
@@ -76,6 +78,7 @@ def read_data(date, chip, warps_dir, variance_trim, bit_mask, verbose=False, var
         #fits.writeto('junk1.fits', masks[-1], overwrite=True)
         #fits.writeto('junk2.fits', variances[-1], overwrite=True)
         #exit()
+    print(f'Using {len(datas)} images.')
     return (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs)
 
 
@@ -230,7 +233,7 @@ def get_shift_rates(ref_wcs, mjds, date, chip, ref_im, ref_im_ind, warps_dir, fw
         pyl.ylabel('rate y (pix/day)')
 
         print('Saving Rates Figure.')
-        pyl.savefig('Rates_figure.png')
+        pyl.savefig('/arc/projects/NewHorizons/HSC_2024/DIFFS/20240612/Rates_figure.png')
         exit()
         
     if swap_signs:

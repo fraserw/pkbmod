@@ -90,22 +90,22 @@ variance_trim = args.variance_trim # the factor above the median variance at whi
 
 bit_mask = {'BAD': 0,
             'BRIGHT_OBJECT': 9,
+            'INTRP': 2,
+            'NO_DATA': 8,
+            'SAT': 1,
+            'STREAK': 18,
+            'UNMASKEDNAN': 19,
+            'REJECTED': 16,
             'CROSSTALK': 11,
             'INEXACT_PSF': 12,
             'INJECTED': 13,
             'INJECTED_CORE': 14,
             'INJECTED_CORE_TEMPLATE': 22,
             'INJECTED_TEMPLATE': 21,
-            'INTRP': 2,
             'NOT_DEBLENDED': 15,
-            'NO_DATA': 8,
-            'REJECTED': 16,
-            'SAT': 1,
             'SAT_TEMPLATE': 20,
             'EDGE': 17,
-            'STREAK': 18,
-            'SUSPECT': 7,
-            'UNMASKEDNAN': 19}
+            'SUSPECT': 7}
 
 
 

@@ -61,10 +61,10 @@ logging.basicConfig(level=args.log_level, filename=f'{args.log_dir}/wesmod_{args
 useNegativeWell = args.useNegativeWell
 
 saves_path = args.saves_path
-warps_dir = '/arc/projects/jwst-tnos/tiles_v3/subtracted/kbmod_prep'
+warps_dir = '/arc/projects/jwst-tnos/tiles_v4/subtracted/kbmod_prep'
 visit = args.visit+'_'+args.chip
 
-plants_dir = '/arc/projects/jwst-tnos/planted/implants_v3'
+plants_dir = '/arc/projects/jwst-tnos/planted/implants_v4'
 
 # snr=4.5 and grid_step=0.75 seem to be sweet spots
 min_snr = args.min_snr ## original SNR during initial kernel search
@@ -328,6 +328,56 @@ final_stamps = grid_stamps[w]
 print(len(final_detections))
 
 
+## sort by SNR and save
+snr_args = np.argsort(final_detections[:,5])[::-1]
+final_detections = final_detections[snr_args]
+final_stamps = final_stamps[snr_args]
+
+try:
+    os.makedirs(f'{saves_path}/results_{visit}/')
+except:
+    pass
+
+logging.info(f'Saving to {saves_path}/results_{visit}/results_.txt')
+with open(f'{saves_path}/results_{visit}/results_.txt', 'w+') as han:
+    for i in range(len(final_detections)):
+        (x,y,rx,ry,f,snr) = final_detections[i,:6]
+        print(f'snr: {snr} flux: {f} x: {x} y: {y} x_v: {rx} y_v: {ry}', file=han)
+
+with open(f'{saves_path}/results_{visit}/input.pars', 'w+') as han:
+    print('useNegativeWell:', useNegativeWell, file=han)
+    print('saves_path:',  saves_path, file=han)
+    print('warps_dir:', warps_dir, file=han)
+    print('min_snr:', min_snr, file=han)
+    print('rate_fwhm_grid_step:', rate_fwhm_grid_step, file=han)
+    print('n_keep:', n_keep, file=han)
+    print('dist_lim:', dist_lim, file=han)
+    print('min_samp:', min_samp, file=han)
+    print('trim_snr:', trim_snr, file=han)
+    print('peak_offset_max:', peak_offset_max, file=han)
+    print('variance_trim:', variance_trim, file=han)
+    print('bitmask:', bit_mask, file=han)
+    print('flag_keys:', flag_keys, file=han)
+
+
+save_stamps_figs = True
+if save_stamps_figs:
+    (z1,z2) = ZScaleInterval().get_limits(mean_stamps)
+    normer = ManualInterval(z1,z2)
+
+    fig = pyl.figure('', (13,13))
+    n_p = 0
+    while n_p<9*9:
+        if n_p == len(final_detections):
+            break
+        sp = fig.add_subplot(9, 9, n_p+1, xticklabels='', yticklabels='')
+        pyl.imshow(normer(final_stamps[n_p]))
+        pyl.title('{} {} {:.1f}'.format(int(final_detections[n_p,0]), int(final_detections[n_p,1]), final_detections[n_p,5]), fontsize=7)
+        n_p+=1
+    pyl.savefig(f'{saves_path}/results_{visit}/final_stamps.png')
+    
+
+    
 ## now compare the outputs to the plants
 plants = []
 logging.info(f'{plants_dir}/implant_converts_epoch{visit[1]}_dither1.csv')
@@ -375,51 +425,3 @@ if show_eff_plot:
     pyl.legend()
     pyl.show()
 
-
-## sort by SNR and save
-snr_args = np.argsort(final_detections[:,5])[::-1]
-final_detections = final_detections[snr_args]
-final_stamps = final_stamps[snr_args]
-
-try:
-    os.makedirs(f'{saves_path}/results_{visit}/')
-except:
-    pass
-
-logging.info(f'Saving to {saves_path}/results_{visit}/results_.txt')
-with open(f'{saves_path}/results_{visit}/results_.txt', 'w+') as han:
-    for i in range(len(final_detections)):
-        (x,y,rx,ry,f,snr) = final_detections[i,:6]
-        print(f'snr: {snr} flux: {f} x: {x} y: {y} x_v: {rx} y_v: {ry}', file=han)
-
-with open(f'{saves_path}/results_{visit}/input.pars', 'w+') as han:
-    print('useNegativeWell:', useNegativeWell, file=han)
-    print('saves_path:',  saves_path, file=han)
-    print('warps_dir:', warps_dir, file=han)
-    print('min_snr:', min_snr, file=han)
-    print('rate_fwhm_grid_step:', rate_fwhm_grid_step, file=han)
-    print('n_keep:', n_keep, file=han)
-    print('dist_lim:', dist_lim, file=han)
-    print('min_samp:', min_samp, file=han)
-    print('trim_snr:', trim_snr, file=han)
-    print('peak_offset_max:', peak_offset_max, file=han)
-    print('variance_trim:', variance_trim, file=han)
-    print('bitmask:', bit_mask, file=han)
-    print('flag_keys:', flag_keys, file=han)
-
-
-save_stamps_figs = True
-if save_stamps_figs:
-    (z1,z2) = ZScaleInterval().get_limits(mean_stamps)
-    normer = ManualInterval(z1,z2)
-
-    fig = pyl.figure('', (13,13))
-    n_p = 0
-    while n_p<9*9:
-        if n_p == len(final_detections):
-            break
-        sp = fig.add_subplot(9, 9, n_p+1, xticklabels='', yticklabels='')
-        pyl.imshow(normer(final_stamps[n_p]))
-        pyl.title('{} {} {:.1f}'.format(int(final_detections[n_p,0]), int(final_detections[n_p,1]), final_detections[n_p,5]), fontsize=7)
-        n_p+=1
-    pyl.savefig('final_stamps.png')

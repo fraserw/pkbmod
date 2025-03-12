@@ -21,7 +21,6 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
     cv = torch.zeros_like(datas)
     cv[0,0,0] = inv_variances[0,0,0]
 
-
     # In[7]:
 
 
@@ -41,9 +40,10 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
         PSI = c
         PHI = cv
 
-        median_alpha = torch.median(PSI/PHI, dim=2)[0]
+        
+        #median_alpha = torch.median(PSI/PHI, dim=2)[0] # doesn't seem to be used for anything
 
-        alpha = torch.sum(PSI/PHI, 2) # flux estimate
+        alpha = torch.nansum(PSI/PHI, 2) # flux estimate
         alpha = torch.nan_to_num(alpha, 0.0)
 
         nu = torch.sum(PSI, 2)/torch.pow(torch.sum(PHI, 2) ,0.5) # SNR estimate
@@ -140,7 +140,7 @@ def trim_negative_flux(detections):
     #    pickle.dump(detections, han)
     #exit()
     # trim the flux negative sources
-    print(detections[:,4])
+
     pos = np.where(detections[:,4]>0)
     detections = detections[pos]
     print(f'Keeping {len(detections)} positive flux candidates')

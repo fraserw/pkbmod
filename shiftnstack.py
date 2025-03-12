@@ -183,8 +183,7 @@ dmjds = mjds-mjds[ref_im_ind]
 
 
 (rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
-print(len(rates))
-exit()
+
 logging.info(f'\nUsing {len(rates)} rates.')
 for r in rates:
     logging.info(r)
@@ -242,11 +241,10 @@ gc.collect()
 torch.cuda.empty_cache()
 
 
-# # trim the flux negative sources
+# trim the flux negative sources
 detections = trim_negative_flux(detections)
 
 # In[10]:
-
 
 # # now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
 #im_datas = functional.pad(torch.tensor(np_datas).cuda(), (khw, khw, khw, khw))
@@ -481,6 +479,8 @@ clust_detections, clust_stamps = predictive_line_cluster(filt_detections, stamps
 del stamps
 gc.collect()
 
+
+
 # trim on snr
 
 print(len(clust_detections))
@@ -512,7 +512,7 @@ w = np.where(grid_detections[:,5]>=trim_snr)
 final_detections = grid_detections[w]
 final_stamps = grid_stamps[w]
 #clust_stamps = clust_stamps[w]
-print(len(final_detections))
+print(f'Number of candidates {len(final_detections)}')
 
 
 # In[17]:
