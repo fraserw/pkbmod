@@ -51,6 +51,8 @@ parser.add_argument('--log-dir', default='/arc/projects/classy/logs/wesmod', typ
 parser.add_argument('--read-from-params', action = 'store_true', default=True, help='Read from pipine/params/wesmod.params and ignore command line inputs')
 parser.add_argument('--rt', action='store_true', default=False, help='Run on the rt diff images instead.')
 parser.add_argument('--save-rates-figure', action='store_true', default=False)
+parser.add_argument('--bitmask', default='bitmask_v19.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
+parser.add_argument('--flagkeys', default='flagkeys_classy.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
 args = parser.parse_args()
 
 rt = '' if not args.rt else 'rt'
@@ -94,12 +96,14 @@ peak_offset_max = args.peak_offset_max ## the max allowable distance between sta
 
 variance_trim = args.variance_trim # the factor above the median variance at which we mask all pixels
 
-bit_mask = {'BAD': 0, 'SAT': 1, 'INTRP': 2, 'EDGE': 4, 'DETECTED': 5,
-                'DETECTED_NEGATIVE': 6, 'SUSPECT': 7, 'NO_DATA': 8, 'CROSSTALK': 9,
-                'NOT_BLENDED': 10, 'UNMASKEDNAN': 11, 'BRIGHT_OBJECT': 12,
-                'CLIPPED': 13, 'INEXACT_PSF': 14, 'REJECTED': 15,
-                'SENSOR_EDGE': 16}
-flag_keys= ['EDGE', 'NO_DATA', 'SAT', 'BAD', 'INTRP', 'BRIGHT_OBJECT']
+#bit_mask = {'BAD': 0, 'SAT': 1, 'INTRP': 2, 'EDGE': 4, 'DETECTED': 5,
+#                'DETECTED_NEGATIVE': 6, 'SUSPECT': 7, 'NO_DATA': 8, 'CROSSTALK': 9,
+#                'NOT_BLENDED': 10, 'UNMASKEDNAN': 11, 'BRIGHT_OBJECT': 12,
+#                'CLIPPED': 13, 'INEXACT_PSF': 14, 'REJECTED': 15,
+#                'SENSOR_EDGE': 16}
+#flag_keys= ['EDGE', 'NO_DATA', 'SAT', 'BAD', 'INTRP', 'BRIGHT_OBJECT']
+
+(bit_mask, flag_keys) = read_bitmask(args.bitmask, args.flagkeys)
 
 flags = 0
 for bit in flag_keys:

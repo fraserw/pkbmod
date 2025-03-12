@@ -48,6 +48,8 @@ parser.add_argument('--kernel-width', default=14, type=int)
 parser.add_argument('--log-level', default=logging.INFO, type=lambda x: getattr(logging, x),
                     help="Configure the logging level.", choices=['INFO', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL'])
 parser.add_argument('--log-dir', default='/arc/projects/NewHorizons/logs/wesmod', type=str)
+parser.add_argument('--bitmask', default='bitmask_v27.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
+parser.add_argument('--flagkeys', default='flagkeys_nh.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
 parser.add_argument('--read-from-params', action = 'store_true', default=False, help='Read from NewHorizons/params/wesmod.params and ignore command line inputs')
 parser.add_argument('--save-rates-figure', action='store_true', default=False)
 args = parser.parse_args()
@@ -88,29 +90,27 @@ peak_offset_max = args.peak_offset_max ## the max allowable distance between sta
 
 variance_trim = args.variance_trim # the factor above the median variance at which we mask all pixels
 
-bit_mask = {'BAD': 0,
-            'BRIGHT_OBJECT': 9,
-            'INTRP': 2,
-            'NO_DATA': 8,
-            'SAT': 1,
-            'STREAK': 18,
-            'UNMASKEDNAN': 19,
-            'REJECTED': 16,
-            'CROSSTALK': 11,
-            'INEXACT_PSF': 12,
-            'INJECTED': 13,
-            'INJECTED_CORE': 14,
-            'INJECTED_CORE_TEMPLATE': 22,
-            'INJECTED_TEMPLATE': 21,
-            'NOT_DEBLENDED': 15,
-            'SAT_TEMPLATE': 20,
-            'EDGE': 17,
-            'SUSPECT': 7}
+#bit_mask = {'BAD': 0,
+#            'BRIGHT_OBJECT': 9,
+#            'INTRP': 2,
+#            'NO_DATA': 8,
+#            'SAT': 1,
+#            'STREAK': 18,
+#            'UNMASKEDNAN': 19,
+#            'REJECTED': 16,
+#            'CROSSTALK': 11,
+#            'INEXACT_PSF': 12,
+#            'INJECTED': 13,
+#            'INJECTED_CORE': 14,
+#            'INJECTED_CORE_TEMPLATE': 22,
+#            'INJECTED_TEMPLATE': 21,
+#            'NOT_DEBLENDED': 15,
+#            'SAT_TEMPLATE': 20,
+#            'EDGE': 17,
+#            'SUSPECT': 7}
+#flag_keys= ['BAD', 'BRIGHT_OBJECT', 'INTRP', 'NO_DATA', 'SAT', 'STREAK', 'UNMASKEDNAN']
 
-
-
-
-flag_keys= ['BAD', 'BRIGHT_OBJECT', 'INTRP', 'NO_DATA', 'SAT', 'STREAK', 'UNMASKEDNAN']
+(bit_mask, flag_keys) = read_bitmask(args.bitmask, args.flagkeys)
 
 flags = 0
 for bit in flag_keys:

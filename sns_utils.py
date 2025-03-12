@@ -424,3 +424,29 @@ def position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, k
     logging.info(f'Number of sources kept after the positional grid minimum search: {len(grid_detections)}.')
 
     return grid_detections, grid_stamps
+
+
+def read_bitmask(bitmask_fn, flags_fn):
+    with open(bitmask_fn) as han:
+        data = han.readlines()
+
+    bitmask = {}
+    for i in range(len(data)):
+        if '#' in data[i]: continue
+
+        s = data[i].split(': ')
+        key, val = s[0], int(float(s[1]))
+        bitmask[key] = val
+
+
+    with open(flags_fn) as han:
+        data = han.readlines()
+        
+    flag_keys = []
+    for i in range(len(data)):
+        if '#' in data[i]: continue
+        key = data[i].split()[0]
+        flag_keys.append(key)
+
+    return (bitmask, flag_keys)
+        

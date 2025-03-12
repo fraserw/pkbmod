@@ -50,6 +50,10 @@ parser.add_argument('--kernel-width', default=6, type=int) ## comparing 6,8,and 
 parser.add_argument('--log-level', default=logging.INFO, type=lambda x: getattr(logging, x),
                     help="Configure the logging level.", choices=['INFO', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL'])
 parser.add_argument('--log-dir', default='/arc/projects/jwst-tnos/logs/wesmod', type=str)
+parser.add_argument('--save-rates-figure', action='store_true', default=False)
+parser.add_argument('--bitmask', default='bitmask_pencilbeam.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
+parser.add_argument('--flagkeys', default='flagkeys_pencilbeam.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
+
 args = parser.parse_args()
 
 if not os.path.isdir(args.log_dir):
@@ -84,8 +88,9 @@ peak_offset_max = args.peak_offset_max ## the max allowable distance between sta
 
 variance_trim = args.variance_trim # the factor above the median variance at which we mask all pixels
 
-bit_mask = {'BAD': 1}
-flag_keys= ['BAD']
+#bit_mask = {'BAD': 1}
+#flag_keys= ['BAD']
+(bit_mask, flagkeys) = read_bitmask(args.bitmask, args.flagkeys)
 
 flags = 0
 for bit in flag_keys:
