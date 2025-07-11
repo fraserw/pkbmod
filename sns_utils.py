@@ -162,12 +162,10 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
         arg_mins = torch.zeros(len(detections), dtype=torch.uint32)
         for id in w[0]:
-
-
             (x,y) = detections[id, :2]
             x = int(x) + khw
             y = int(y) + khw
-            nb = nb_ref*detections[id, 4]
+            nb = nb_ref*detections[id, 4] # array of scaled brightnesses in steps of brightness*test_low to brightness*test_high
 
             k = kernel.repeat((1, n_bright_test, 1, 1, 1))
             for ib in range(nb.size()[0]):
@@ -175,7 +173,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
             diff = c[:,:,:,y-khw:y+khw, x-khw:x+khw].repeat((1, n_bright_test, 1, 1, 1))
             diff -= k
-            diff = diff**2
+            diff = diff*diff
             diff *= cv[:,:,:,y-khw:y+khw, x-khw:x+khw].repeat((1, n_bright_test, 1, 1, 1))
             l = torch.sum(diff, (0,2,3,4))
 
@@ -184,7 +182,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
         arg_mins_cpu = arg_mins.cpu()
 
         W = np.where((arg_mins_cpu!=0) & (arg_mins_cpu!=(n_bright_test-1)))
-        print(f'{ir+1}/{len(rates)}', len(w[0]), len(W[0]),time.time()-t1)
+        print(f'{ir+1}/{len(rates)}, pre: {len(w[0])}, post: {len(W[0])},  in time {time.time()-t1}')
         if ir == 0:
             keeps = W[0]
         else:

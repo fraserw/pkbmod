@@ -248,9 +248,11 @@ torch.cuda.empty_cache()
 # trim the flux negative sources
 detections = trim_negative_flux(detections)
 
+
 # In[10]:
 
-# # now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
+#  now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
+#  pad the data and variance arrays
 #im_datas = functional.pad(torch.tensor(np_datas).cuda(), (khw, khw, khw, khw))
 #inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
 im_datas = functional.pad(torch.tensor(np_datas).to(device), (khw, khw, khw, khw))
@@ -265,79 +267,35 @@ cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
 keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85)
-# In[12]:
 
+#x_test, y_test = 160.475, 734.372
+#w = np.where(((detections[:,0] - x_test)**2 + (detections[:,1] - y_test)**2 )**0.5 < 8)
+#for i in w[0]:
+#    print(detections[i])
+#exit()
 
 print(len(keeps), len(detections))
 filt_detections = np.copy(detections[keeps])
-print(filt_detections.shape)
 del keeps
 
+#x_test, y_test = 160.475, 734.372
+#w = np.where(((filt_detections[:,0] - x_test)**2 + (filt_detections[:,1] - y_test)**2 )**0.5 < 8)
+#for i in w[0]:
+#    print(filt_detections[i])
+#exit()
 
-# In[13]:
 
-
+# some cleanup
 del inv_vars
 gc.collect()
 torch.cuda.empty_cache()
+
 
 #im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).cuda()
 im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).to(device)
 del np_masks
 
 # create the stamps
-# mean_stamps = []
-# #med_stamps = []
-# indices = []
-# saved= False
-# for ir in range(len(rates)):
-#
-#     # these are required to reset from the nans below
-#     c[0,0,0] = im_datas[0,0,0]
-#     cv[0,0,0] = im_masks[0,0,0]
-#
-#     t1 = time.time()
-#     w = np.where((filt_detections[:,2]==rates[ir][0]) & (filt_detections[:,3] == rates[ir][1]))
-#
-#     for id in range(1, n_im):
-#         shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
-#         c[0,0,id]  = torch.roll(im_datas[0,0,id], shifts=shifts, dims=[0,1])
-#         cv[0,0,id] = torch.roll(im_masks[0,0,id], shifts=shifts, dims=[0,1]) # mask values with 1 are GOOD pixels
-#     mean_stamp_frame = torch.sum(c, 2)
-#
-#     #c[cv == 0] = float('nan')
-#     #med_stamp_frame = torch.nanmedian(c, 2)[0]
-#
-#     mask_frame = torch.sum(cv, 2)
-#
-#     for iw in w[0]:
-#         x,y = filt_detections[iw,:2].astype('int')
-#         #print(x,y, iw, khw)
-#         mean_stamp = mean_stamp_frame[0,0,y:y+khw*2+1, x:x+khw*2+1]
-#
-#         """
-#         med_sections = c[0,0,:,y:y+khw*2+1, x:x+khw*2+1].cpu()
-#         mask_sections = cv[0,0,:,y:y+khw*2+1, x:x+khw*2+1].cpu()
-#         mask_sections[np.where((np.isnan(mask_sections)) | (np.isinf(mask_sections)))] = 0
-#
-#         # mask_sections==0 are bad pixels
-#         # numpy masks value == 1 are bad pixels
-#         masked_med_sections = ma.array(med_sections, mask= 1-mask_sections)
-#         med_stamps.append(ma.median(masked_med_sections,axis=0).filled(0.0))
-#         """
-#
-#         mask = np.copy(mask_frame[0,0,y:y+khw*2+1, x:x+khw*2+1].cpu())
-#         mask[np.where((np.isnan(mask)) | (np.isinf(mask)))] = 0.0
-#         np.clip(mask, 1., n_im, out=mask)
-#         mean_stamps.append(np.copy(mean_stamp.cpu())/mask )
-#
-#         indices.append(iw)
-
-
-
-# indices = np.array(indices)
-# mean_stamps = np.array(mean_stamps)[indices]
-# #med_stamps = np.array(med_stamps)[indices]
 mean_stamps = create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw)
 
 del im_masks
@@ -379,20 +337,7 @@ if show_test_stamps:
 
 # In[14]:
 
-
-# # trim the ones with peak offset more than peak_offset_max pixels
-# (N, a, b) = stamps.shape
-# (gx,gy) = np.meshgrid(np.arange(b), np.arange(a))
-# gx = gx.reshape(a*b)
-# gy = gy.reshape(a*b)
-# rs_stamps = stamps.reshape(N,a*b)
-# args = np.argmax(rs_stamps,axis=1)
-# X = gx[args]
-# Y = gy[args]
-# radial_d = ((X-b/2)**2+(Y-a/2)**2)**0.5
-# w = np.where(radial_d<peak_offset_max)
-# filt_detections = filt_detections[w]
-# stamps = stamps[w]
+# # trim the candidates with peak offset more than peak_offset_max pixels
 stamps, filt_detections = peak_offset_filter(stamps, filt_detections, peak_offset_max)
 
 save_filt_detections = False
@@ -400,85 +345,7 @@ if save_filt_detections:
     with open('filt_detections.npy', 'wb') as han:
         np.save(han, filt_detections)
 
-# # do predictive line clustering
-# show_plot = False
-#
-# proc_filt_detections = np.copy(filt_detections)
-#
-# proc_inds = np.arange(len(proc_filt_detections))
-# clust_detections, clust_inds = [], []
-#
-# #for i in range(0,10):
-# while len(proc_filt_detections)>0:
-#
-#     arg_max = np.argmax(proc_filt_detections[:,5]) # 5 - max on SNR, 4 is flux
-#     #pyl.imshow(normer(stamps[arg_max]))
-#     #pyl.show()
-#     #exit()
-#     x_o, y_o, rx_o, ry_o, f_o, snr_o = proc_filt_detections[arg_max, :6]
-#
-#     #this secondary where command is necessary because of memory overflows in large detection lists
-#     w = np.where( (proc_filt_detections[:,0] > proc_filt_detections[arg_max,0]-55) & (proc_filt_detections[:,0] < proc_filt_detections[arg_max,0] +60)
-#                  & (proc_filt_detections[:,1] > proc_filt_detections[arg_max,1]-55) & (proc_filt_detections[:,1] < proc_filt_detections[arg_max,1] +60))
-#
-#     W = np.where( ((proc_filt_detections[w[0],0]-proc_filt_detections[arg_max,0])**2 + (proc_filt_detections[w[0],1]-proc_filt_detections[arg_max,1])**2) < 60**2)
-#     w = w[0][W[0]]
-#
-#     fd_subset = proc_filt_detections[w]
-#
-#     drx = fd_subset[:,2] - rx_o
-#     dry = fd_subset[:,3] - ry_o
-#     dt = dmjds # just for clarity
-#
-#     x_n, y_n = x_o - drx*dt[-1], y_o - dry*dt[-1] # predicted centroid  position of secondary detection shifted at the differential wrong rate.
-#
-#     dx, dy = (x_n - x_o), (y_n - y_o) # predicted centroid shifted such that best detection is now at origin
-#     dxp = dx*fd_subset[:,1]
-#     dyp = dy*fd_subset[:,0]
-#     xm = x_n*y_o
-#     ym = y_n*x_o
-#     dx2 = dx**2
-#     dy2 = dy**2
-#     top = np.abs(dyp - dxp + xm - ym)
-#     bottom = np.sqrt( dx2 + dy2 )
-#     dist = top/bottom
-#     #dist = np.abs( (y_n-y_o)*fd_subset[:, 0] - (x_n-x_o)*fd_subset[:,1] + x_n*y_o - y_n*x_o    ) / np.sqrt( (x_n-x_o)**2 + (y_n-y_o)**2)
-#
-#     vert_distance = np.abs(y_n - fd_subset[:,1])
-#     hor_distance = np.abs(x_n - fd_subset[:,0])
-#
-#
-#     clust = np.where( (dist<dist_lim) | (np.isnan(dist)) | ((dist<dist_lim) & (drx==0) & (dry==0)))
-#     not_clust = np.where(~( (dist<dist_lim) | (np.isnan(dist)) | ((dist<dist_lim) & (drx==0) & (dry==0))) )
-#
-#     #clust = np.where( ( (hor_distance < dist_lim_x)&(vert_distance<dist_lim_y) ) | (np.isnan(dist)) | ((dist<dist_lim)&(dx==0)&(dy==0) ))
-#     #not_clust = np.where( ~( ( (hor_distance < dist_lim_x)&(vert_distance<dist_lim_y) ) | (np.isnan(dist)) | ((dist<dist_lim)&(dx==0)&(dy==0) ) ))
-#
-#     if len(clust[0])>=min_samp:
-#         clust_detections.append(proc_filt_detections[arg_max])
-#         clust_inds.append(proc_inds[arg_max])
-#
-#     if show_plot:
-#         fig = pyl.figure(1)
-#         sp = fig.add_subplot(111, projection='3d')
-#         sp.scatter3D(fd_subset[clust,0], fd_subset[clust,1], fd_subset[clust,3], marker='o', c='b')
-#         sp.scatter3D(fd_subset[not_clust,0], fd_subset[not_clust,1], fd_subset[not_clust,3], marker='^', c='r')
-#         sp.scatter3D([proc_filt_detections[arg_max,0]],[proc_filt_detections[arg_max,1]],[proc_filt_detections[arg_max,3]], marker='s', c='k', s=200)
-#         pyl.title(dist_lim)
-#         pyl.xlabel('X')
-#         pyl.ylabel('Y')
-#         sp.set_zlabel('rX')
-#         pyl.show()
-#
-#
-#     mask = np.ones(len(proc_filt_detections), dtype='bool')
-#     mask[w[clust]] = False
-#     proc_filt_detections = proc_filt_detections[mask]
-#     proc_inds = proc_inds[mask]
-#
-#
-# clust_detections = np.array(clust_detections)
-# clust_stamps = stamps[np.array(clust_inds)]
+# apply predictive clustering
 clust_detections, clust_stamps = predictive_line_cluster(filt_detections, stamps, dmjds, dist_lim, min_samp, init_select_proc_distance=60, show_plot=False)
 del stamps
 gc.collect()
@@ -546,6 +413,8 @@ for i in range(1,len(data)):
 plants = np.array(plants)
 plants = plants[np.argsort(plants[:,4])]
 
+print('# min_dist_r, min_dist_v, x, y, rate_x, rate_y, mag, det_shift, det_filt, det_clust, det_final, num_match')
+logging.info('# min_dist_r, min_dist_v, x, y, rate_x, rate_y, mag, det_shift, det_filt, det_clust, det_final, num_match')
 for i in range(len(plants)):
     for j,det in enumerate([detections, filt_detections, clust_detections, final_detections]):
 
