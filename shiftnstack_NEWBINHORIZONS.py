@@ -52,7 +52,7 @@ parser.add_argument('--save-rates-figure', action='store_true', default=False)
 parser.add_argument('--bitmask', default='bitmask_v19.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
 parser.add_argument('--flagkeys', default='flagkeys_classy.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
 args = parser.parse_args()
-
+print(args)
 
 if not os.path.isdir(args.log_dir):
     os.makedirs(args.log_dir)
