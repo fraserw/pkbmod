@@ -30,7 +30,7 @@ from sns_utils import *
 from sns_data_NEWBINHORIZONS import *
 
 parser = ArgumentParser()
-paraer.add_argumemt('patch-id')
+parser.add_argumemt('patch-id')
 parser.add_argument('--dontUseNegativeWell', default = False, action='store_true')
 parser.add_argument('--saves_path', default = '/arc/projects/classy/wesmod_results', help='Path to save the results.txt and input.pars files to. Default=%(default)s. if --rt is used, wesmod will be replaced with rtwesmod')
 parser.add_argument('--min_snr', default=4.5, type=float)
