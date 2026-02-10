@@ -12,17 +12,15 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     Read in all the requesite image data
     """
 
-    print(f'{image_path}/*_{patch_id}_*.repro')
     datas, masks, variances, mjds, psfs, fwhms, im_nums = [], [], [], [], [], [], []
     fits_files = glob.glob(f'{image_path}/*_{patch_id}_*.repro')
     fits_files.sort()
-    print(fits_files)
 
     if len(fits_files)==0:
         print(f'Cannot find any warps at {visit}.')
         exit(1)
     else:
-        print(f'Reading {len(fits_files)} files from {warps_dir}/{visit}/{chip}')
+        print(f'Reading {len(fits_files)} files from {image_path}/{visit}/{chip}')
 
     for i in range(len(fits_files)):
         with fits.open(fits_files[i]) as han:
