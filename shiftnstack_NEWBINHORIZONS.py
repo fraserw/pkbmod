@@ -44,7 +44,7 @@ parser.add_argument('--use-gaussian-kernel', action='store_true', default=False)
 parser.add_argument('--kernel-width', default=14, type=int)
 parser.add_argument('--log-level', default=logging.INFO, type=lambda x: getattr(logging, x),
                     help="Configure the logging level.", choices=['INFO', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL'])
-parser.add_argument('--log-dir', default='/arc/projects/classy/logs/wesmod', type=str)
+parser.add_argument('--log-dir', default='.', type=str)
 parser.add_argument('--read-from-params', action = 'store_true', default=False, help='Read from pipine/params/wesmod.params and ignore command line inputs')
 parser.add_argument('--rt', action='store_true', default=False, help='Run on the rt diff images instead.')
 parser.add_argument('--save-rates-figure', action='store_true', default=False)
