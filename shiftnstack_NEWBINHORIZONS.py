@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('/arc/home/fraserw/git/trippy')
 
 #from astropy.io import fits
 #from astropy.wcs import WCS
