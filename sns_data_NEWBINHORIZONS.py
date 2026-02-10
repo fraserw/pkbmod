@@ -20,7 +20,7 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
         print(f'Cannot find any warps at {visit}.')
         exit(1)
     else:
-        print(f'Reading {len(fits_files)} files from {image_path}/{visit}/{chip}')
+        print(f'Reading {len(fits_files)} files from {image_path}/')
 
     for i in range(len(fits_files)):
         with fits.open(fits_files[i]) as han:
