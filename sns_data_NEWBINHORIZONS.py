@@ -22,7 +22,7 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     else:
         print(f'Reading {len(fits_files)} files from {image_path}/')
 
-    for i in range(len(fits_files)):
+    for i in range(len(fits_files)[10:]):
         with fits.open(fits_files[i]) as han:
 
             datas.append(han[0].data)

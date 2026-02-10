@@ -175,10 +175,17 @@ fwhms = np.array(fwhms)
 
 dmjds = mjds-mjds[ref_im_ind]
 
-# In[4]:
+
+for i in np.arange(2.0, 3.0, 0.05):
+    for j in range(-np.pi/4., np.pi/4, 0.01):
+        rates.append([i*24./.2, j])
+rates = np.array(rates)
+print(rates)
 
 
-(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
+
+#(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
+
 
 logging.info(f'\nUsing {len(rates)} rates.')
 for r in rates:
