@@ -181,7 +181,7 @@ for i in np.arange(-0.5, -4.0, -0.05):
     for j in np.arange(-np.pi/4., np.pi/4, 0.2):
         rates.append([i*24./.2, j])
 rates = np.array(rates)
-print(rates)
+print(rates, len(rates))
 
 
 
