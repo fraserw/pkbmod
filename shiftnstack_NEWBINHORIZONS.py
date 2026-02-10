@@ -30,6 +30,7 @@ from sns_utils import *
 from sns_data_NEWBINHORIZONS import *
 
 parser = ArgumentParser()
+paraer.add_argumemt('patch-id')
 parser.add_argument('--dontUseNegativeWell', default = False, action='store_true')
 parser.add_argument('--saves_path', default = '/arc/projects/classy/wesmod_results', help='Path to save the results.txt and input.pars files to. Default=%(default)s. if --rt is used, wesmod will be replaced with rtwesmod')
 parser.add_argument('--min_snr', default=4.5, type=float)
@@ -52,14 +53,10 @@ parser.add_argument('--bitmask', default='bitmask_v19.dat', help='The bitmask to
 parser.add_argument('--flagkeys', default='flagkeys_classy.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
 args = parser.parse_args()
 
-rt = '' if not args.rt else 'rt'
-if args.rt:
-    args.log_dir = args.log_dir.replace('wesmod', 'rtwesmod')
-    args.saves_path = args.saves_path.replace('wesmod', 'rtwesmod')
 
 if not os.path.isdir(args.log_dir):
     os.makedirs(args.log_dir)
-logging.basicConfig(level=args.log_level, filename=f'{args.log_dir}/{rt}wesmod_{args.visit}_{args.chip}.log', encoding='utf-8',)
+logging.basicConfig(level=args.log_level, filename=f'{args.log_dir}/test.log', encoding='utf-8',)
 
 # In[2]:
 
@@ -69,10 +66,8 @@ r2d = 180./np.pi
 useNegativeWell = True if not args.dontUseNegativeWell else False
 
 saves_path = args.saves_path
-warps_dir = f'/arc/projects/classy/{rt}warps/'
-dbimages = '/arc/projects/classy/dbimages/'
-visit = args.visit
-chip = args.chip
+image_path = f'/sdf/scratch/rubin/kbmod/runs/01202026/65.0_20X20/large_piles/0_to_99'
+patch_id = args.patch_id
 
 
 # snr=4.5 and grid_step=0.75 seem to be sweet spots
@@ -136,7 +131,7 @@ if args.read_from_params:
 # In[3]:
 
 
-(datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(visit, chip, warps_dir, dbimages, variance_trim, bit_mask, verbose=False)
+(datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path, dbimages, variance_trim, bit_mask, verbose=False)
 (A,B) = datas[0].shape
 
 
