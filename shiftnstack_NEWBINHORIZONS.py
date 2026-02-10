@@ -203,7 +203,7 @@ useGaussianKernel = args.use_gaussian_kernel
 
 
 khw = args.kernel_width//2
-kernel = create_kernel(psfs, dmjds, rates, useNegativeWell, useGaussianKernel, kernel_width=args.kernel_width, im_nums=im_nums,visit=visit)
+kernel = create_kernel(psfs, dmjds, rates, useNegativeWell, useGaussianKernel, kernel_width=args.kernel_width, im_nums=im_nums,visit=None)
 rot_kernel = torch.rot90(kernel, k=2, dims=(3,4))
 
 
