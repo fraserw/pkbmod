@@ -131,7 +131,7 @@ if args.read_from_params:
 # In[3]:
 
 
-(datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path, dbimages, variance_trim, bit_mask, verbose=False)
+(datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path,  variance_trim, bit_mask, verbose=False)
 (A,B) = datas[0].shape
 
 
