@@ -1,6 +1,6 @@
 #cell 3
 #from astropy.wcs import WCS
-import trippy, glob, logging, time
+import glob, logging, time
 from astropy.io import fits
 import numpy as np, scipy as sci
 import torch

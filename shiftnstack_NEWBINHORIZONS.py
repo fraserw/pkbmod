@@ -31,8 +31,6 @@ from sns_utils import *
 from sns_data_NEWBINHORIZONS import *
 
 parser = ArgumentParser()
-parser.add_argument('visit', default = '2022-09-19-AS2_Sep19UT+1')
-parser.add_argument('chip', default = '00')
 parser.add_argument('--dontUseNegativeWell', default = False, action='store_true')
 parser.add_argument('--saves_path', default = '/arc/projects/classy/wesmod_results', help='Path to save the results.txt and input.pars files to. Default=%(default)s. if --rt is used, wesmod will be replaced with rtwesmod')
 parser.add_argument('--min_snr', default=4.5, type=float)
@@ -48,7 +46,7 @@ parser.add_argument('--kernel-width', default=14, type=int)
 parser.add_argument('--log-level', default=logging.INFO, type=lambda x: getattr(logging, x),
                     help="Configure the logging level.", choices=['INFO', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL'])
 parser.add_argument('--log-dir', default='/arc/projects/classy/logs/wesmod', type=str)
-parser.add_argument('--read-from-params', action = 'store_true', default=True, help='Read from pipine/params/wesmod.params and ignore command line inputs')
+parser.add_argument('--read-from-params', action = 'store_true', default=False, help='Read from pipine/params/wesmod.params and ignore command line inputs')
 parser.add_argument('--rt', action='store_true', default=False, help='Run on the rt diff images instead.')
 parser.add_argument('--save-rates-figure', action='store_true', default=False)
 parser.add_argument('--bitmask', default='bitmask_v19.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
