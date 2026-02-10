@@ -177,8 +177,8 @@ dmjds = mjds-mjds[ref_im_ind]
 
 
 rates = []
-for i in np.arange(-2.0, -4.0, -0.05):
-    for j in np.arange(-np.pi/4., np.pi/4, 0.2):
+for i in np.arange(-2.0, -3.0, -0.05):
+    for j in np.arange(-np.pi/4., np.pi/4., 0.2):
         rates.append([i*24./.2, j])
 rates = np.array(rates)
 print(rates, len(rates))
@@ -389,54 +389,6 @@ print(f'Number of candidates {len(final_detections)}')
 # In[17]:
 
 
-plants = []
-
-pf_glob = f'{warps_dir}/{visit}/{chip}/{ref_im}p??-*plantList' if rt=='' else f'{warps_dir}/{visit}/{chip}/{ref_im}s??-*plantList'
-print(pf_glob)
-logging.info(f'\n Using plantList {pf_glob}')
-plant_files = glob.glob(pf_glob)
-plant_files.sort()
-with open(plant_files[0]) as han:
-    data = han.readlines()
-for i in range(1,len(data)):
-    s = data[i].split()
-
-    ra,dec,rate_ra,rate_dec = float(s[1]), float(s[2]), float(s[7]), float(s[8])
-    x0,y0 = wcs.all_world2pix(ra,dec,0)
-    x1,y1 = wcs.all_world2pix(ra+rate_ra/3600.0,dec+rate_dec/3600.0,0)
-
-    rate_x = (x1-x0)*24.0
-    rate_y = (y1-y0)*24.0
-
-    plants.append([x0, y0, rate_x, rate_y, float(s[9]), 0,0,0,0])
-
-plants = np.array(plants)
-plants = plants[np.argsort(plants[:,4])]
-
-print('# min_dist_r, min_dist_v, x, y, rate_x, rate_y, mag, det_shift, det_filt, det_clust, det_final, num_match')
-logging.info('# min_dist_r, min_dist_v, x, y, rate_x, rate_y, mag, det_shift, det_filt, det_clust, det_final, num_match')
-for i in range(len(plants)):
-    for j,det in enumerate([detections, filt_detections, clust_detections, final_detections]):
-
-        dist_sq = np.sum((plants[i][:2] - det[:,:2])**2, axis=1)
-        dist_rate_sq = np.sum((plants[i][2:4] - det[:,2:4])**2, axis=1)
-        w = np.where((dist_sq<4**2) & (dist_rate_sq<60.**2))  # 4 and 30 seems like good values
-        if len(w[0])>0:
-            #print(dist[w])
-            #print(dist_rate[w])
-            #print()
-            plants[i,5+j]=1
-    print("{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.2f} {} {} {} {} {}".format(np.min(dist_sq**0.5), np.min(dist_rate_sq**0.5), plants[i][0], plants[i][1], plants[i,2], plants[i,3], plants[i][4], plants[i,5], plants[i,6], plants[i,7], plants[i,8], len(w[0])))
-    logging.info("{:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.2f} {} {} {} {} {}".format(np.min(dist_sq**0.5), np.min(dist_rate_sq**0.5), plants[i][0], plants[i][1], plants[i,2], plants[i,3], plants[i][4], plants[i,5], plants[i,6], plants[i,7], plants[i,8], len(w[0])))
-
-
-
-# In[18]:
-
-
-print('Number of plants found:', len(np.where(plants[:,-1])[0]))
-logging.info('Number of plants found: '+str(len(np.where(plants[:,-1])[0])))
-
 show_plot = False
 if show_plot:
     eff_bin_width = 0.25
@@ -468,13 +420,13 @@ try:
 except:
     pass
 
-logging.info(f'Saving to {saves_path}/{visit}/results_{chip}/results_.txt')
-with open(f'{saves_path}/{visit}/results_{chip}/results_.txt', 'w+') as han:
+logging.info(f'Saving to {saves_path}/results_{patch_id}/results_.txt')
+with open(f'{saves_path}/results_{patch_id}/results_.txt', 'w+') as han:
     for i in range(len(final_detections)):
         (x,y,rx,ry,f,snr) = final_detections[i,:6]
         print(f'snr: {snr} flux: {f} x: {x} y: {y} x_v: {rx} y_v: {ry}', file=han)
 
-with open(f'{saves_path}/{visit}/results_{chip}/input.pars', 'w+') as han:
+with open(f'{saves_path}/results_{patch_id}/input.pars', 'w+') as han:
     print('useNegativeWell:', useNegativeWell, file=han)
     print('saves_path:',  saves_path, file=han)
     print('warps_dir:', warps_dir, file=han)
