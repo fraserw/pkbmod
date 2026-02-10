@@ -210,7 +210,7 @@ def create_kernel(psfs, dmjds, rates, useNegativeWell=True, useGaussianKernel=Fa
         #print(gauss)
 
 
-        kernel = torch.tensor(np.zeros((1, 1, len(mjds), kernel_width, kernel_width),dtype='float32')).to(device)#.cuda()
+        kernel = torch.tensor(np.zeros((1, 1, len(dmjds), kernel_width, kernel_width),dtype='float32')).to(device)#.cuda()
         for ir in range(datas.size()[2]):
             kernel[0,0,ir,:,:] = torch.tensor(np.copy(gauss))
 
