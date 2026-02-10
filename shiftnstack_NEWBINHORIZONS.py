@@ -28,7 +28,7 @@ from argparse import ArgumentParser
 import logging
 
 from sns_utils import *
-from sns_data import *
+from sns_data_NEWBINHORIZONS import *
 
 parser = ArgumentParser()
 parser.add_argument('visit', default = '2022-09-19-AS2_Sep19UT+1')
