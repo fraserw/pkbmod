@@ -1,4 +1,4 @@
-import trippy, torch
+import torch
 from astropy.io import fits
 import glob
 from astropy.wcs import WCS
