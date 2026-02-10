@@ -6,21 +6,34 @@ import torch
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def read_data(visit, warps_dir, variance_trim, bit_mask, var_trim_keyword='BAD', verbose=False):
+def read_data(visit, warps_dir, variance_trim, bit_mask, var_trim_keyword='BAD', verbose=False, filelist = None):
     """
     Read in all the requesite image data
     """
 
     datas, masks, variances, mjds, psfs,  = [], [], [], [], []
     if verbose:
-        print(f'Reading images from {warps_dir}/{visit}/*fits')
+        if filelist is not None:
+            print(f'Reading files from list {filelist}.')
+        else:
+            print(f'Reading images from {warps_dir}/{visit}/*fits')
 
-    fits_files = glob.glob(f'{warps_dir}/{visit}/*fits')
-    fits_files.sort()
+    if filelist is None:
+        fits_files = glob.glob(f'{warps_dir}/{visit}/*fits')
+        fits_files.sort()
+        
+        if len(fits_files)==0:
+            print(f'Cannot find any warps at {visit}.')
+            exit(1)
 
-    if len(fits_files)==0:
-        print(f'Cannot find any warps at {visit}.')
-        exit(1)
+    else:
+        fits_files = []
+        with open(filelist) as han:
+            data = han.readlines()
+        
+        for i in range(len(data)):
+            fits_files.append(data[i].split()[0])
+            
 
     for i in range(len(fits_files)):
         with fits.open(fits_files[i]) as han:
@@ -48,7 +61,7 @@ def read_data(visit, warps_dir, variance_trim, bit_mask, var_trim_keyword='BAD',
 
 
 
-def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
+def get_shift_rates(ref_wcs, mjds, visit, spacing = 70., rate_lims_custom = None):
     """
     get a grid of shift rates from the planted classy imagery
     """
@@ -58,8 +71,12 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
 
     # spacing sould be ~125 pix per day, which corresponds to roughly 1 pixel in the single epoch start to finish
 
-    spacing = 70.
-    if visit[1]=='1':
+    if rate_lims_custom is not None:
+        rate_lims = np.array(rate_lims_custom)
+        mx = np.max(np.abs(rate_lims[:,0]))
+        my = np.max(np.abs(rate_lims[:,1]))
+        max_rate = (mx**2 + my**2)**0.5
+    elif visit[1]=='1':
         rate_lims = [[-1000., 1000.], [-2000., 2000.]]
         max_rate = 2000
     elif visit[1]=='2':
@@ -79,7 +96,7 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
 
     plant_rates = np.array(plant_rates)
 
-    mean_rate = np.mean(plant_rates, axis=0)
+    mean_rate = np.mean(plant_rates, axis=0) if rate_lims_custom is None else [0.0,0.0]
 
     dx,dy = np.meshgrid(np.arange(rate_lims[0][0], rate_lims[0][1]+spacing, spacing), np.arange(rate_lims[1][0], rate_lims[1][1]+spacing, spacing))
     (a,b) = dx.shape
@@ -93,7 +110,9 @@ def get_shift_rates(ref_wcs, mjds, visit, rate_fwhm_grid_step, A, B):
     rates[:,0] = dx+mean_rate[0]
     rates[:,1] = dy+mean_rate[1]
 
-    return rates, plant_rates
+
+    return (rates, plant_rates)
+
 
     pyl.scatter(plant_rates[:,0], plant_rates[:,1], zorder = 10)
     pyl.scatter(rates[:,0], rates[:,1], zorder=1, marker='s', alpha=0.5)

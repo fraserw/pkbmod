@@ -89,6 +89,10 @@ def get_shift_rates(ref_wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, f
     for i in range(40):
         c = str(i).zfill(2)
 
+        ## hacks to skip missing chips
+        if visit=='2023-08-19-AS3Y2_Aug19UTC' and c=='29': continue
+        ##
+        
         print(f'{warps_dir}/{visit}/{c}/{ref_im}?{c}-*plantList')
         plant_files = glob.glob(f'{warps_dir}/{visit}/{c}/{ref_im}?{c}-*plantList')
         plant_files.sort()
