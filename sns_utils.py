@@ -155,8 +155,8 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
         t1 = time.time()
         w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
-        print(rates[ir], detections[0], w)
-        
+        print(rates[ir], rates[ir][0]==detections[0][2], rates[ir][1] == detections[0][3], detections[0], w)
+        exit()
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
             c[0,0,id]  = torch.roll(im_datas[0,0,id], shifts=shifts, dims=[0,1])
