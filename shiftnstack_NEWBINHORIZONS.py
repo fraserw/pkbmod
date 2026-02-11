@@ -137,7 +137,7 @@ if args.read_from_params:
 
 ecl_ang = calc_ecliptic_angle(wcs, A, B, retrograde=True)
 print(f'   working with ecliptic angle {ecl_ang} degrees.')
-
+exit()
 
 np_datas = np.expand_dims(np.expand_dims(np.array(datas, dtype='float32'),0),0)
 np_inv_variances = np.expand_dims(np.expand_dims(1.0/np.array(variances, dtype='float32'),0),0)
