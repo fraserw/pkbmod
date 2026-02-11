@@ -150,13 +150,13 @@ def trim_negative_flux(detections):
 def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85):
     nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device) # .cuda()
 
-    han = open('brightnesses.dat', 'w+')
     for ir in range(len(rates)):
 
         t1 = time.time()
-        w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
-        print(rates[ir], rates[ir][0]==detections[0][2], rates[ir][1] == detections[0][3], detections[0], w)
-        exit()
+        diff_angs = np.abs(detections[:,3]-rates[ir][1])
+        w = np.where((detections[:,2]==rates[ir][0]) & (diff_angs<0.0001))#(detections[:,3] == rates[ir][1]))
+        print(len(w[0]))
+        
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
             c[0,0,id]  = torch.roll(im_datas[0,0,id], shifts=shifts, dims=[0,1])
@@ -168,7 +168,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
             x = int(x) + khw
             y = int(y) + khw
             nb = nb_ref*detections[id, 4] # array of scaled brightnesses in steps of brightness*test_low to brightness*test_high
-            print(detections[id,4], file=han)
+            #print(detections[id,4], file=han)
             
             k = kernel.repeat((1, n_bright_test, 1, 1, 1))
             for ib in range(nb.size()[0]):
@@ -192,8 +192,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
             keeps = np.concatenate([keeps, W[0]])
     print(len(keeps))
     print(np.max(keeps))
-    han.close()
-    exit()
+
     logging.info(f'Number kept after brightness filter {len(keeps)} of {len(detections)} total detections.')
 
     return keeps
