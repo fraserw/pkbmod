@@ -26,8 +26,8 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
         with fits.open(fits_files[i]) as han:
 
             datas.append(han[0].data)
-            masks.append(han[1].data)
-            variances.append(han[2].data)
+            masks.append(han[2].data)
+            variances.append(han[1].data)
 
             
             if i ==0:
@@ -46,6 +46,9 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
         masks[-1][w] += 2**bit_mask[var_trim_keyword]
     print(f'Read in {len(datas)} images.\n')
 
+    print(datas[0][1000:1050,1000:1050])
+    print(fits_files[0])
+    
     return (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs)
 
 
