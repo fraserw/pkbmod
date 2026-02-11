@@ -180,7 +180,7 @@ rates = []
 for i in np.arange(-2.0, -3.0, -0.05):
     for j in np.arange(-np.pi/4., np.pi/4., 0.2):
         rates.append([i*24./.2, j])
-rates = np.array(rates)
+rates = np.array(rates, dtype='float16')
 print(rates, len(rates))
 
 
@@ -213,7 +213,7 @@ for ir in range(n_im):
 
 
 # do the shift-stacking
-snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=True)
+snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
 print('Done shifting')
 
 # In[8]:
