@@ -1,4 +1,4 @@
-\41;353;0c#cell 3
+
 #from astropy.wcs import WCS
 import glob, logging, time
 from astropy.io import fits
