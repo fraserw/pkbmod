@@ -184,7 +184,7 @@ for rate in np.linspace(0.2, 0.3, 6):
     for angle in np.linspace(-np.pi/2., np.pi/2., 6):
         dx_ecl, dy_ecl = rate*np.cos(ecl_ang*np.pi/180.+angle), rate*np.sin(ecl_ang*np.pi/180.+angle)
         rates.append([dx_ecl, dy_ecl])
-rates = np.array(rates, dtype='float16')
+rates = np.array(rates, dtype='float16')*24./0.2
 print(rates, len(rates))
 
 
