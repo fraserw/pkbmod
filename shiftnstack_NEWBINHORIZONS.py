@@ -180,7 +180,7 @@ dmjds = mjds-mjds[ref_im_ind]
 
 ## choose the rates to perform shift-stack on.
 rates = []
-for rate in np.linspace(2., 4., 10):
+for rate in np.linspace(0.2, 0.3, 6):
     for angle in np.linspace(-np.pi, np.pi, 6):
         dx_ecl, dy_ecl = rate*np.sin(ecl_ang*np.pi/180+angle), rate*np.cos(ecl_ang*np.pi/180.+angle)
         rates.append([dx_ecl, dy_ecl])
