@@ -213,7 +213,7 @@ for ir in range(n_im):
 
 
 # do the shift-stacking
-snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
+snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=True)
 print('Done shifting')
 
 # In[8]:
