@@ -1,4 +1,4 @@
-#cell 3
+\41;353;0c#cell 3
 #from astropy.wcs import WCS
 import glob, logging, time
 from astropy.io import fits
@@ -81,6 +81,7 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
             #l[w]=0.0
             im = fits.PrimaryHDU(l)
             im.writeto('snr_test.fits', overwrite=True)
+            exit()
             #
 
     print('Max per image flux of candidates:' , torch.max(alpha_image))
@@ -153,9 +154,10 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
     for ir in range(len(rates)):
 
         t1 = time.time()
-        diff_angs = np.abs(detections[:,3]-rates[ir][1])
-        w = np.where((detections[:,2]==rates[ir][0]) & (diff_angs<0.0001))#(detections[:,3] == rates[ir][1]))
-        print(len(w[0]))
+        #diff_angs = np.abs(detections[:,3]-rates[ir][1])
+        #w = np.where((detections[:,2]==rates[ir][0]) & (diff_angs<0.0001))#(detections[:,3] == rates[ir][1]))
+        #print(len(w[0]))
+        w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
         
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
