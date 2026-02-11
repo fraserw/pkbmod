@@ -28,11 +28,12 @@ import logging
 
 from sns_utils import *
 from sns_data_NEWBINHORIZONS import *
+frmo calc_ecliptic_angle import calc_ecliptic_angle
 
 parser = ArgumentParser()
 parser.add_argument('--patch-id')
 parser.add_argument('--dontUseNegativeWell', default = False, action='store_true')
-parser.add_argument('--saves_path', default = '/arc/projects/classy/wesmod_results', help='Path to save the results.txt and input.pars files to. Default=%(default)s. if --rt is used, wesmod will be replaced with rtwesmod')
+parser.add_argument('--saves_path', default = '.', help='Path to save the results.txt and input.pars files to. Default=%(default)s. if --rt is used, wesmod will be replaced with rtwesmod')
 parser.add_argument('--min_snr', default=4.5, type=float)
 parser.add_argument('--trim_snr', default=5.5, type=float)
 parser.add_argument('--n-keep', default=4, type=int)
@@ -134,6 +135,8 @@ if args.read_from_params:
 (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path,  variance_trim, bit_mask, verbose=False)
 (A,B) = datas[0].shape
 
+ecl_ang = calc_ecliptic_angle(wcs, A, B, retrograde=True)
+print(f'   working with ecliptic angle {ecl_ang} degrees.')
 
 
 np_datas = np.expand_dims(np.expand_dims(np.array(datas, dtype='float32'),0),0)
@@ -176,6 +179,7 @@ fwhms = np.array(fwhms)
 dmjds = mjds-mjds[ref_im_ind]
 
 
+## choose the rates to perform shift-stack on. 
 rates = []
 for i in np.arange(-2.0, -3.0, -0.05):
     for j in np.arange(-np.pi/4., np.pi/4., 0.2):
@@ -253,8 +257,6 @@ detections = trim_negative_flux(detections)
 
 #  now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
 #  pad the data and variance arrays
-#im_datas = functional.pad(torch.tensor(np_datas).cuda(), (khw, khw, khw, khw))
-#inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).cuda(), (khw, khw, khw, khw))
 im_datas = functional.pad(torch.tensor(np_datas).to(device), (khw, khw, khw, khw))
 inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw))
 #
