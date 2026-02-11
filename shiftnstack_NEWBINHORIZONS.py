@@ -267,7 +267,7 @@ cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
 #keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85)
-keeps = np.arange(len(im_datas)
+keeps = np.arange(len(im_datas))
 
 #x_test, y_test = 160.475, 734.372
 #w = np.where(((detections[:,0] - x_test)**2 + (detections[:,1] - y_test)**2 )**0.5 < 8)
