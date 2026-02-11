@@ -28,7 +28,7 @@ import logging
 
 from sns_utils import *
 from sns_data_NEWBINHORIZONS import *
-frmo calc_ecliptic_angle import calc_ecliptic_angle
+from calc_ecliptic_angle import calc_ecliptic_angle
 
 parser = ArgumentParser()
 parser.add_argument('--patch-id')
