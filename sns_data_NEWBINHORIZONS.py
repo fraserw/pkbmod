@@ -19,7 +19,6 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     for i in range(len(fits_files)):
         s = fits_files[i].split('/')
         ind = s[-1].split('_')[0]
-        print(ind)
         indices.append(int(float(ind)))
     indices = np.array(indices)
     args = np.argsort(indices)

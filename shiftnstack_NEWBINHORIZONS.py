@@ -136,8 +136,7 @@ if args.read_from_params:
 (A,B) = datas[0].shape
 
 ecl_ang = calc_ecliptic_angle(wcs, A, B, retrograde=True)
-print(f'   working with ecliptic angle {ecl_ang} degrees.')
-exit()
+
 
 np_datas = np.expand_dims(np.expand_dims(np.array(datas, dtype='float32'),0),0)
 np_inv_variances = np.expand_dims(np.expand_dims(1.0/np.array(variances, dtype='float32'),0),0)
@@ -179,11 +178,12 @@ fwhms = np.array(fwhms)
 dmjds = mjds-mjds[ref_im_ind]
 
 
-## choose the rates to perform shift-stack on. 
+## choose the rates to perform shift-stack on.
 rates = []
-for i in np.arange(-2.0, -3.0, -0.05):
-    for j in np.arange(-np.pi/4., np.pi/4., 0.2):
-        rates.append([i*24./.2, j])
+for rate in np.linspace(2., 4., 10):
+    for angle in np.linspace(-np.pi, np.pi, 6):
+        dx_ecl, dy_ecl = rate*np.sin(ecl_ang*np.pi/180+angle), rate*np.cos(ecl_ang*np.pi/180.+angle)
+        rates.append([dx_ecl, dy_ecl])
 rates = np.array(rates, dtype='float16')
 print(rates, len(rates))
 
