@@ -14,7 +14,16 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
 
     datas, masks, variances, mjds, psfs, fwhms, im_nums = [], [], [], [], [], [], []
     fits_files = glob.glob(f'{image_path}/*_{patch_id}_*.repro')
-    fits_files.sort()
+    
+    indices = []
+    for i in range(len(fits_files)):
+        s = data[i].split('/')
+        ind = s[-1].split('_')[0]
+        print(ind)
+        indices.append(int(float(ind)))
+    indices = np.array(indices)
+    args = np.argsort(indices)
+    fits_files = np.array(fits_files)[args]
 
     if len(fits_files)==0:
         print(f'Cannot find any warps at {visit}.')
