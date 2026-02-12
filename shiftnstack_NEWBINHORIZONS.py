@@ -218,6 +218,10 @@ for ir in range(n_im):
 n_rates_at_a_time = 100
 all_detections = []
 n = 0
+steps = n_rates/n_rates_at_a_time
+if steps-np.floor(steps)>0:
+    steps+=1
+steps = int(steps)
 for i in range(0, len(rates), n_rates_at_a_time):
     rates_to_consider = rates[i:min(i+n_rates_at_a_time, len(rates))]
     
@@ -297,7 +301,7 @@ c[0,0,0] = im_datas[0,0,0]
 cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
-keeps = brigtness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-7)
+keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-7)
 
 
 print(len(keeps), len(detections))
