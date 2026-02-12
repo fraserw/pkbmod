@@ -220,44 +220,57 @@ for ir in range(n_im):
     inv_variances[0,0,ir,:,:] = torch.conv2d(inv_variances[:,:,ir,:,:], kernel[:,:,ir,:,:]*kernel[:,:,ir,:,:], padding='same')
 
 
-# do the shift-stacking
-snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
-print('Done shifting')
-
-
-# In[8]:
-
-## sort and keep the top n_keep detections,
-## this step approximately doubles the memory footprint to 60 GB. Could do this in stages to reduce memory footprint at the cost of processing speed
-
-#sort_inds = torch.sort(snr_image, 2, descending=True)[1]
-#### sort inds hack
-sort_inds = torch.zeros((1, 1, n_keep, A, B), dtype=torch.int64, device='cpu')
-
-sort_step = 100
-a = 0
-b=sort_step
-while b<B:
-    b = min(a+sort_step, B)
-    print(f' Sorting {a} to {b} of {B}...', end=' ')
-    sort_inds_wedge = torch.sort(snr_image[:,:,:,:,a:b].to(device), 2, descending=True)[1]
-    sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:n_keep,:,:]
-    a+=sort_step
-    print('Done')
+# do 50 rates at a time
+n_rates_at_a_time = 50
+all_detections = []
+n = 0
+for i in range(0, len(rates), n_rates_at_a_time):
+    rates_to_consider = rates[i:min(i+n_rates_at_a_time, len(rates))]
+    
+    # do the shift-stacking
+    snr_image, alpha_image = run_shifts(datas, inv_variances, rates_to_consider, dmjds, min_snr, writeTestImages=False)
+    print('Done shifting')
 
 
 
-# # trim the negative SNR sources. The reason these show up is because the likelihood formalism sucks
-detections = trim_negative_snr(snr_image, alpha_image, sort_inds, n_keep, rates, A, B)
-del snr_image, alpha_image, sort_inds
-gc.collect()
-torch.cuda.empty_cache()
+    ## sort and keep the top n_keep detections,
+    ## this step approximately doubles the memory footprint to 60 GB. Could do this in stages to reduce memory footprint at the cost of processing speed
+
+    #### sort inds hack
+    sort_inds = torch.zeros((1, 1, n_keep, A, B), dtype=torch.int64, device='cpu')
+
+    sort_step = 100
+    a = 0
+    b=sort_step
+    while b<B:
+        b = min(a+sort_step, B)
+        print(f' Sorting {a} to {b} of {B}...', end=' ')
+        sort_inds_wedge = torch.sort(snr_image[:,:,:,:,a:b].to(device), 2, descending=True)[1]
+        sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:n_keep,:,:]
+        a+=sort_step
+        print('Done')
 
 
-# trim the flux negative sources
-detections = trim_negative_flux(detections)
+
+    # # trim the negative SNR sources. The reason these show up is because the likelihood formalism sucks
+    detections = trim_negative_snr(snr_image, alpha_image, sort_inds, n_keep, rates, A, B)
+    del snr_image, alpha_image, sort_inds
+    gc.collect()
+    torch.cuda.empty_cache()
 
 
+    # trim the flux negative sources
+    detections = trim_negative_flux(detections)
+
+    if len(all_detections) == 0:
+        all_detections = np.array(detections)
+    else:
+        all_detections = np.concatentate([all_detections, detections])
+
+detections = all_detections
+print(f'Kept {len(detections)} total detections.')
+
+        
 # In[10]:
 
 #  now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
@@ -273,7 +286,7 @@ c[0,0,0] = im_datas[0,0,0]
 cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
-keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-5)
+keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-6)
 #keeps = np.arange(len(im_datas))
 
 #x_test, y_test = 160.475, 734.372
