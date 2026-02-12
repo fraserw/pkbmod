@@ -226,6 +226,10 @@ for ir in range(n_im):
 snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
 print('Done shifting')
 
+junk = snr_image[0,0,0].cpu()
+fits.writeto('junk.fits', junk, overwrite=True)
+exit()
+
 # In[8]:
 
 ## sort and keep the top n_keep detections,
