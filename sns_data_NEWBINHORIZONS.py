@@ -38,6 +38,7 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
             masks.append(han[2].data)
             variances.append(han[1].data)
 
+            print(datas[-1].shape)
             
             if i ==0:
                 wcs = WCS(han[1].header)
