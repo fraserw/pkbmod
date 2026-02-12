@@ -240,9 +240,9 @@ b=sort_step
 while b<B:
     b = min(a+sort_step, B)
     print(f' Sorting {a} to {b} of {B}...', end=' ')
-    print(snr_image[:,:,:,:,a:b].shape, sort_inds[:,:,:,:,a:b].shape)
     sort_inds_wedge = torch.sort(snr_image[:,:,:,:,a:b].to(device), 2, descending=True)[1]
-    sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:4,:,:]
+    print(sort_inds_wedge.shape)
+    sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:n_keep,:,:]
     a+=sort_step
     print('Done')
 
