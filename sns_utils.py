@@ -188,13 +188,13 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
         W = np.where((arg_mins_cpu!=0) & (arg_mins_cpu!=(n_bright_test-1)))
         print(f'{ir+1}/{len(rates)}, pre: {len(w[0])}, post: {len(W[0])},  in time {time.time()-t1}')
-        if len(w[0])==0 and len(W[0])==0:
-            print(rates[ir])
-            print()
-            uni = np.unique(detections[:,3])
-            for u in uni:
-                print(u)
-            exit()
+        #if len(w[0])==0 and len(W[0])==0:
+        #    print(rates[ir])
+        #    print()
+        #    uni = np.unique(detections[:,3])
+        #    for u in uni:
+        #        print(u)
+        #    exit()
         if ir == 0:
             keeps = W[0]
         else:
