@@ -457,7 +457,7 @@ final_detections = final_detections[args]
 final_stamps = final_stamps[args]
 
 try:
-    os.makedirs(f'{saves_path}/{visit}/results_{chip}/')
+    os.makedirs(f'{saves_path}/results_{patch_id}/')
 except:
     pass
 
