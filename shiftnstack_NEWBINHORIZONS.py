@@ -194,6 +194,7 @@ fwhm = np.median(fwhms)
 rates = get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False)
 
 
+
 #(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
 
 
@@ -241,7 +242,6 @@ while b<B:
     b = min(a+sort_step, B)
     print(f' Sorting {a} to {b} of {B}...', end=' ')
     sort_inds_wedge = torch.sort(snr_image[:,:,:,:,a:b].to(device), 2, descending=True)[1]
-    print(sort_inds_wedge.shape, snr_image[:,:,:,:,a:b].to(device).shape, snr_image[:,:,:,:,a:b].to(device).size())
     Sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:n_keep,:,:]
     a+=sort_step
     print('Done')
