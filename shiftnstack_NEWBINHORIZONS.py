@@ -222,7 +222,6 @@ steps = len(rates)/n_rates_at_a_time
 if steps-np.floor(steps)>0:
     steps+=1
 steps = int(steps)
-#all_snr_image = np.zeros(1,1,1
 for i in range(0, len(rates), n_rates_at_a_time):
     rates_to_consider = rates[i:min(i+n_rates_at_a_time, len(rates))]
     
@@ -250,7 +249,6 @@ for i in range(0, len(rates), n_rates_at_a_time):
         print('Done')
 
 
-
     # # trim the negative SNR sources. The reason these show up is because the likelihood formalism sucks
     detections = trim_negative_snr(snr_image, alpha_image, sort_inds, n_keep, rates, A, B)
     del snr_image, alpha_image, sort_inds
@@ -266,19 +264,30 @@ for i in range(0, len(rates), n_rates_at_a_time):
     else:
         all_detections = np.concatenate([all_detections, detections])
 detections = all_detections
+
 """
 # now sort on detections to keep only the best n_keep detections per pixel
+big_im_r0 = np.zeros(A,B,steps, dtype='float')
+big_im_r1 = np.zeros(A,B,steps, dtype='float')
+big_im_alpha = np.zeros(A,B,steps, dtype='float')
+big_im_snr = np.zeros(A,B,steps, dtype='float')
 to_keep = []
 for y in range(A):
     for x in range(B):
         w = np.where((detections[:,0]==x) & (detections[:,1]==y))
-        if len(w[0])<=n_keep:
-            for ii in range(len(w[0])):
-                to_keep.append(w[0][ii])
-        else:
-            args = np.argsort(detections[w][5])
-            for ii in range(n_keep):
-                to_keep.append(w[0][args[ii]])
+        big_im_r0[y, x, :len(w[0])] = detections[:,2][w]  
+        big_im_r1[y, x, :len(w[0])] = detections[:,3][w]  
+        big_im_alpha[y, x, :len(w[0])] = detections[:,4][w]  
+        big_im_snr[y, x, :len(w[0])] = detections[:,5][w]
+args = np.argsort(big_im_snr, axis=2)
+print(args)
+big_im_r0 = big_im_r0[:,:,args]
+big_im_r1 = big_im_r1[:,:,args]
+big_im_alpha = big_im_alpha[:,:,args]
+big_im_snr = big_im_snr[:,:,args]
+for y in range(A):
+    for x in range(B):
+        
 to_keep = np.array(to_keep)
 
 detections = all_detections[to_keep]

@@ -225,9 +225,9 @@ def create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw,
         cv[0,0,0] = im_masks[0,0,0]
 
         if exact_check:
-            w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
+            w = np.where((filt_detections[:,2]==rates[ir][0]) & (filt_detections[:,3] == rates[ir][1]))
         else:
-            w = np.where((np.isclose(detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(detections[:,3], rates[ir][1], rtol=inexact_rtol)))
+            w = np.where((np.isclose(filt_detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(filt_detections[:,3], rates[ir][1], rtol=inexact_rtol)))
 
 
         for id in range(1, len(dmjds)):
