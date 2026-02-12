@@ -218,10 +218,11 @@ for ir in range(n_im):
 n_rates_at_a_time = 100
 all_detections = []
 n = 0
-steps = n_rates/n_rates_at_a_time
+steps = len(rates)/n_rates_at_a_time
 if steps-np.floor(steps)>0:
     steps+=1
 steps = int(steps)
+#all_snr_image = np.zeros(1,1,1
 for i in range(0, len(rates), n_rates_at_a_time):
     rates_to_consider = rates[i:min(i+n_rates_at_a_time, len(rates))]
     
