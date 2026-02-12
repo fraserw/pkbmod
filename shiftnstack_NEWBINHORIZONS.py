@@ -265,7 +265,7 @@ for i in range(0, len(rates), n_rates_at_a_time):
     if len(all_detections) == 0:
         all_detections = np.array(detections)
     else:
-        all_detections = np.concatentate([all_detections, detections])
+        all_detections = np.concatenate([all_detections, detections])
 
 detections = all_detections
 print(f'Kept {len(detections)} total detections.')
