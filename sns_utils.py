@@ -27,12 +27,15 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
     snr_image = torch.zeros((1,1,len(rates), datas.size()[3], datas.size()[4]), dtype=torch.float16)
     alpha_image = torch.zeros((1,1,len(rates), datas.size()[3], datas.size()[4]), dtype=torch.float32)
 
-    #rates=[[-200.6777606841237, 78.88276756451387]]
+    rates=[[-30., 0.0]]
     for ir in range(len(rates)):
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
             c[0,0,id,] = torch.roll(datas[0,0,id], shifts=shifts, dims=[0,1])
+            print(torch.argmax(c[0,0,id], dim=0), torch.argmax(c[0,0,id], dim=1), end=' ')
             cv[0,0,id] = torch.roll(inv_variances[0,0,id], shifts=shifts, dims=[0,1])
+        print()
+        exit()
         #C = functional.conv3d(c, kernel)
         #sums = torch.sum(functional.conv3d(c, ones,padding='same'), 2)
 
@@ -149,14 +152,11 @@ def trim_negative_flux(detections):
     return detections
 
 def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85):
-    nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device) # .cuda()
+    nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device)
 
     for ir in range(len(rates)):
 
         t1 = time.time()
-        #diff_angs = np.abs(detections[:,3]-rates[ir][1])
-        #w = np.where((detections[:,2]==rates[ir][0]) & (diff_angs<0.0001))#(detections[:,3] == rates[ir][1]))
-        #print(len(w[0]))
         w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
         
         for id in range(1, n_im):
@@ -188,6 +188,13 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
         W = np.where((arg_mins_cpu!=0) & (arg_mins_cpu!=(n_bright_test-1)))
         print(f'{ir+1}/{len(rates)}, pre: {len(w[0])}, post: {len(W[0])},  in time {time.time()-t1}')
+        if len(w[0])==0 and len(W[0])==0:
+            print(rates[ir])
+            print()
+            uni = np.unique(detections[:,3])
+            for u in uni:
+                print(u)
+            exit()
         if ir == 0:
             keeps = W[0]
         else:
