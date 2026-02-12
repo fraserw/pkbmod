@@ -155,14 +155,18 @@ np_masks[w] = 0
 np_masks = np.clip(np_masks,0,1) ## masks with 1 are GOOD pixels, 0 are BAD pixels
 
 
+## cehck for variance=0 and data=real
+w = np.where(np.isinf(np_inv_variances) | np.isnan(np_inv_variances))
+np_inv_variances[w] = 0.0
+np_datas[w] = 0.0
+
 datas = torch.tensor(np_datas).to(device)
 inv_variances = torch.tensor(np_inv_variances).to(device)
 
 mjds = np.array(mjds)
 im_nums = np.array(im_nums, dtype='int')
 
-fits.writeto('junk.fits', np_datas[0,0,0,:,:], overwrite=True)
-exit()
+
 
 mid_time = (mjds[-1]+mjds[0])/2.
 diff_times = mjds-mid_time
@@ -181,14 +185,6 @@ fwhms = np.array(fwhms)
 dmjds = mjds-mjds[ref_im_ind]
 
 
-## choose the rates to perform shift-stack on.
-#rates = []
-#for rate in np.linspace(0.2, 0.3, 6):
-#    for angle in np.linspace(-np.pi/2., np.pi/2., 6):
-#        dx_ecl, dy_ecl = rate*np.cos(ecl_ang*np.pi/180.+angle), rate*np.sin(ecl_ang*np.pi/180.+angle)
-#        rates.append([dx_ecl, dy_ecl])
-#rates = np.array(rates, dtype='float16')*24./0.2
-#print(rates, len(rates))
 
 rate_lims = [0.2, 0.3]
 ang_lims = [-45., 45.]
@@ -197,8 +193,6 @@ fwhm = np.median(fwhms)
 rates = get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False)
 
 
-
-#(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
 
 
 logging.info(f'\nUsing {len(rates)} rates.')
