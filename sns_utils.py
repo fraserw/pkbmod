@@ -200,21 +200,16 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
         W = np.where((arg_mins_cpu!=0) & (arg_mins_cpu!=(n_bright_test-1)))
         print(f'{ir+1}/{len(rates)}, vx: {str(rates[ir][0])[:7]}, vy: {str(rates[ir][1])[:7]}, pre: {len(w[0])}, post: {len(W[0])},  in time {time.time()-t1}')
-        #if len(w[0])==0 and len(W[0])==0:
-        #    print(rates[ir])
-        #    print()
-        #    uni = np.unique(detections[:,3])
-        #    for u in uni:
-        #        print(u)
-        #    exit()
+
         if ir == 0:
             keeps = W[0]
         else:
             keeps = np.concatenate([keeps, W[0]])
-    print(len(keeps))
-    print(np.max(keeps))
+    #print(len(keeps))
+    #print(np.max(keeps))
 
     logging.info(f'Number kept after brightness filter {len(keeps)} of {len(detections)} total detections.')
+    print(f'Number kept after brightness filter {len(keeps)} of {len(detections)} total detections.')
 
     return keeps
 
@@ -267,6 +262,8 @@ def create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw)
             indices.append(iw)
 
     indices = np.array(indices)
+    print(indices)
+    indices = indices.astype('int')
     mean_stamps = np.array(mean_stamps)[indices]
     #med_stamps = np.array(med_stamps)[indices]
 
