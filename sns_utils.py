@@ -32,7 +32,7 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
             c[0,0,id,] = torch.roll(datas[0,0,id], shifts=shifts, dims=[0,1])
-            print(torch.argmax(c[0,0,id], dim=0), torch.argmax(c[0,0,id], dim=1), end=' ')
+            print(torch.argmax(torch.argmax(c[0,0,id], dim=0)), torch.argmax(torch.argmax(c[0,0,id], dim=1)), end=' ')
             cv[0,0,id] = torch.roll(inv_variances[0,0,id], shifts=shifts, dims=[0,1])
         print()
         exit()
