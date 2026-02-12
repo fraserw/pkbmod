@@ -151,22 +151,25 @@ def trim_negative_flux(detections):
     logging.info(f'Keeping {len(detections)} positive flux candidates')
     return detections
 
-def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85):
+def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=True, inexact_rtol=1.e-5):
     nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device)
 
-    with open('junk.txt', 'w+') as han:
-        for jjj in range(len(detections)):
-            print(detections[jjj], file=han)
-
-        print('', file=han)
-        for jjj in range(len(rates)):
-            print(rates[jjj], file=han)
-    exit()
+    #with open('junk.txt', 'w+') as han:
+    #    for jjj in range(len(detections)):
+    #        print(detections[jjj], file=han)
+    #
+    #    print('', file=han)
+    #    for jjj in range(len(rates)):
+    #        print(rates[jjj], file=han)
+    #exit()
 
     for ir in range(len(rates)):
 
         t1 = time.time()
-        w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
+        if exact_check:
+            w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
+        else:
+            w = np.where((np.isclose(detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(detections[i,3], rates[ir][1], rtol=inexact_rtol)))
         
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))

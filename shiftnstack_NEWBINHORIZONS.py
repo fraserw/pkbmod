@@ -263,8 +263,7 @@ detections = trim_negative_flux(detections)
 #  now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
 #  pad the data and variance arrays
 im_datas = functional.pad(torch.tensor(np_datas).to(device), (khw, khw, khw, khw))
-#inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw)) ## is the 0.5 a bug here or earlier?
-inv_vars = functional.pad(torch.tensor(np_inv_variances).to(device), (khw, khw, khw, khw))
+inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw)) ## is the 0.5 a bug here or earlier?
 #
 del np_datas # I don't think this is used again.
 gc.collect()
@@ -274,7 +273,7 @@ c[0,0,0] = im_datas[0,0,0]
 cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
-keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85)
+keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-5)
 #keeps = np.arange(len(im_datas))
 
 #x_test, y_test = 160.475, 734.372
