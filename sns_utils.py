@@ -27,7 +27,7 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
     snr_image = torch.zeros((1,1,len(rates), datas.size()[3], datas.size()[4]), dtype=torch.float16)
     alpha_image = torch.zeros((1,1,len(rates), datas.size()[3], datas.size()[4]), dtype=torch.float32)
 
-    print(dmjds)
+    print(snr_image.size())
     rates=[[-30., 0.0]]
     for ir in range(len(rates)):
         for id in range(0, n_im):
