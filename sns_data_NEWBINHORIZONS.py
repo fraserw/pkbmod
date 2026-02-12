@@ -122,7 +122,7 @@ def get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fw
         current_rate += drate
 
     rates = np.array(rates)
-    rates*=-1.0
+    rates[:,0]*=-1.0
 
     print('Number of rates:', len(rates))
 
