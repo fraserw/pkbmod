@@ -438,7 +438,7 @@ def position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, k
             #pyl.plot(nb.cpu(), l.cpu()-torch.max(l.cpu()), marker='o')
 
 
-    keeps = np.array(keeps)
+    keeps = np.array(keeps).astype('int')
     grid_detections = clust_detections[keeps]
     grid_stamps = clust_stamps[keeps]
     print(len(grid_detections), len(clust_detections))
