@@ -190,7 +190,7 @@ dmjds = mjds-mjds[ref_im_ind]
 rate_lims = [0.2, 0.4]
 ang_lims = [-45., 45.]
 pix_scale = 0.2
-fwhm = np.median(fwhm)
+fwhm = np.median(fwhms)
 rates = get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False)
 
 
