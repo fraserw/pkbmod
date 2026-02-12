@@ -411,7 +411,7 @@ inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, k
 cv[0,0,0] = inv_vars[0,0,0]
 
 
-grid_detections, grid_stamps = position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, kernel, dmjds, rates, khw)
+grid_detections, grid_stamps = position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, kernel, dmjds, rates, khw, exact_check=False, inexact_rtol=1.e-7)
 
 
 # In[16]:
