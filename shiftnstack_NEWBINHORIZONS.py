@@ -192,7 +192,7 @@ ang_lims = [-45., 45.]
 pix_scale = 0.2
 fwhm = np.median(fwhms)
 rates = get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False)
-print(np.min(rates[:,0]),'*****')
+
 
 #(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
 
