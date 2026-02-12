@@ -376,7 +376,7 @@ def predictive_line_cluster(filt_detections, stamps, dmjds, dist_lim, min_samp=2
 
     return clust_detections, clust_stamps
 
-def position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, kernel, dmjds, rates, khw, n_offsets=5):
+def position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, kernel, dmjds, rates, khw, n_offsets=5, exact_check=True, inexact_rtol=1.e-7):
 
     # now apply a positional filter on the clust_detections to see if the likelihood minimimum is near the centre
     #n_offsets = 5 # +- n_offsets in x and y
@@ -399,8 +399,14 @@ def position_filter(clust_detections, clust_stamps, im_datas, inv_vars, c, cv, k
     keeps = []
     for ir in range(len(rates)):
 
-        t1 = time.time()
-        w = np.where((clust_detections[:,2]==rates[ir][0]) & (clust_detections[:,3] == rates[ir][1]))
+        #t1 = time.time()
+        #w = np.where((clust_detections[:,2]==rates[ir][0]) & (clust_detections[:,3] == rates[ir][1]))
+        if exact_check:
+            w = np.where((clust_detections[:,2]==rates[ir][0]) & (clust_detections[:,3] == rates[ir][1]))
+        else:
+            w = np.where((np.isclose(clust_detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(clust_detections[:,3], rates[ir][1], rtol=inexact_rtol)))
+
+
         if len(w[0])==0: continue
 
         for id in range(1, len(dmjds)):
