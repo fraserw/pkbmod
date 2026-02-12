@@ -257,15 +257,14 @@ torch.cuda.empty_cache()
 # trim the flux negative sources
 detections = trim_negative_flux(detections)
 
-print(np.min(detections[:,4]), np.max(detections[:,4]), np.min(detections[:,5]), np.max(detections[:,5]))
-exit()
 
 # In[10]:
 
 #  now apply the brightness filter. Check n_bright_test values between test_low and test_high fraction of the estimated value
 #  pad the data and variance arrays
 im_datas = functional.pad(torch.tensor(np_datas).to(device), (khw, khw, khw, khw))
-inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw))
+#inv_vars = functional.pad(torch.tensor(0.5*np_inv_variances).to(device), (khw, khw, khw, khw)) ## is the 0.5 a bug here or earlier?
+inv_vars = functional.pad(torch.tensor(np_inv_variances).to(device), (khw, khw, khw, khw))
 #
 del np_datas # I don't think this is used again.
 gc.collect()

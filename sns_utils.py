@@ -154,6 +154,15 @@ def trim_negative_flux(detections):
 def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85):
     nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device)
 
+    with open('junk.txt', 'w+') as han:
+        for jjj in range(len(detections)):
+            print(detections[jjj], file=han)
+
+        print('', file=han)
+        for jjj in range(len(rates)):
+            print(rates[jjj], file=han)
+    exit()
+
     for ir in range(len(rates)):
 
         t1 = time.time()
