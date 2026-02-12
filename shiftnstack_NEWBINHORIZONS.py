@@ -220,8 +220,8 @@ for ir in range(n_im):
     inv_variances[0,0,ir,:,:] = torch.conv2d(inv_variances[:,:,ir,:,:], kernel[:,:,ir,:,:]*kernel[:,:,ir,:,:], padding='same')
 
 
-# do 50 rates at a time
-n_rates_at_a_time = 50
+# do at most 100 rates at a time. Eventually one should do a sort on the complete all_detections, pixel by pixel, to ensure that only n_keep sources are kept. 
+n_rates_at_a_time = 100
 all_detections = []
 n = 0
 for i in range(0, len(rates), n_rates_at_a_time):
@@ -267,7 +267,23 @@ for i in range(0, len(rates), n_rates_at_a_time):
     else:
         all_detections = np.concatenate([all_detections, detections])
 
-detections = all_detections
+# now sort on detections to keep only the best n_keep detections per pixel
+to_keep = []
+for y in range(A):
+    for x in range(B):
+        w = np.where((detections[:,0]==x) & (detections[:,1]==y))
+        if len(w[0])<=n_keep:
+            for ii in range(len(w[0])):
+                to_keep.append(w[0][ii])
+        else:
+            args = np.argsort(detections[w][5])
+            for ii in range(n_keep):
+                to_keep.append(w[0][args[ii]])
+to_keep = np.array(to_keep)
+
+detections = all_detections[to_keep]
+
+
 print(f'Kept {len(detections)} total detections.')
 
         
