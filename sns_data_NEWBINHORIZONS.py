@@ -13,7 +13,7 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     """
 
     datas, masks, variances, mjds, psfs, fwhms, im_nums = [], [], [], [], [], [], []
-    fits_files = glob.glob(f'{image_path}/*_{patch_id}_*.repro')
+    fits_files = glob.glob(f'{image_path}/*_{patch_id}_*special*.repro')
     
     indices = []
     for i in range(len(fits_files)):
@@ -60,153 +60,84 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     return (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs)
 
 
-
-def get_shift_rates(ref_wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=False):
+def get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False):
+    """                                                                                                                                   
+    get a grid of shift rates from the planted classy imagery                                                                             
     """
-    get a grid of shift rates from the planted classy imagery
-    """
 
+    d2r = np.pi/180.
 
-    mid_ra, mid_dec = ref_wcs.all_pix2world(B/2., A/2., 0)
+    min_ang = (ecl_ang + np.min(np.array(ang_lims)))*d2r
+    max_ang = (ecl_ang + np.max(np.array(ang_lims)))*d2r
+    med_ang = (min_ang+max_ang)/2.
 
-    plant_rates = []
-    for i in range(40):
-        c = str(i).zfill(2)
-
-        ## hacks to skip missing chips
-        if visit=='2023-08-19-AS3Y2_Aug19UTC' and c=='29': continue
-        ##
-        
-        print(f'{warps_dir}/{visit}/{c}/{ref_im}?{c}-*plantList')
-        plant_files = glob.glob(f'{warps_dir}/{visit}/{c}/{ref_im}?{c}-*plantList')
-        plant_files.sort()
-
-        with open(plant_files[0]) as han:
-            data = han.readlines()
-        for i in range(1,len(data)):
-            s = data[i].split()
-            ra,dec,rate_ra,rate_dec = float(s[1]), float(s[2]), float(s[7]), float(s[8])
-            x0,y0 = ref_wcs.all_world2pix(mid_ra, mid_dec,0)
-            x1,y1 = ref_wcs.all_world2pix(mid_ra+rate_ra/3600.0, mid_dec+rate_dec/3600.0,0)
-
-            rate_x = (x1-x0)*24.0
-            rate_y = (y1-y0)*24.0
-
-
-            plant_rates.append([rate_x, rate_y])
-    plant_rates = np.array(plant_rates)
-    if rots[chip] == 0:
-        plant_rates*=-1
-    print(f'Number of planted sources: {len(plant_rates)}')
-    
-    w = np.where(np.less(plant_rates[:,0]**2+plant_rates[:,1]**2, (24*4.5/0.187)**2))
-    angs = np.arctan2(plant_rates[:,1][w], plant_rates[:,0][w])%(2*np.pi)
-
-
-    min_ang = np.min(angs)
-    max_ang = np.max(angs)
-    med_ang = np.median(angs)
-    # bodge angle hack
+    # bodge angle hack                                                                                                                    
     if min_ang<0:
         while min_ang<0:
             min_ang+=2*np.pi
             med_ang+=2*np.pi
 
     d_ang = max(max_ang-med_ang, med_ang-min_ang)
-    max_ang = med_ang + d_ang
-    min_ang = med_ang - d_ang
     print('Angles (min, max, med, delta):', min_ang, max_ang, med_ang, d_ang)
 
 
-    W = np.where(np.abs(plant_rates[:,0])<200)
-    l = sci.stats.linregress(plant_rates[:,0][W], plant_rates[:,1][W])
-
-    max_x = np.max(plant_rates[:,0] + 5)
-    max_y = max_x*l.slope+l.intercept
-
-    print('Max x/y:', max_x, max_y)
-
-    slopes = (plant_rates[:,1]-max_y)/(plant_rates[:,0]-max_x)
-    m_low = np.min(slopes[w])
-    b_low = max_y - m_low*max_x
-    m_high = np.max(slopes[w])
-    b_high = max_y - m_high*max_x
-
-    x = np.linspace(max_x, -(24*4.5/0.187), 5)
-    y_low = x*m_low+b_low
-    y_high = x*m_high+b_high
-
-    if save_rates_figure:
-        fig = pyl.figure(1)
-        fig.add_subplot(211)
-        pyl.scatter(max_x, max_y)
-        pyl.plot(x,y_low)
-        pyl.plot(x,y_high)
-        pyl.scatter(plant_rates[:,0], plant_rates[:,1], zorder=-1, marker='.')
-
-    # In[5]:
+    seeing = fwhm
+    print(f'Mean FWHM {seeing}" ', end='')
+    seeing /= pix_scale # pixels                                                                                                          
+    print(f'{seeing} pix.')
 
 
-    seeing = np.mean(fwhms)*0.187 #0.7
-    print(f'Mean FWHM {seeing}"')
-    seeing /= 0.187 # pixels
+    dh = (np.max(mjds)-np.min(mjds)) # days, need to take the np.max and np.min because images aren't necessarily in order of increase ti\
+me.                                                                                                                                       
+    drate = rate_fwhm_grid_step*seeing/dh  # 0.75 seems to be a good sweet spot                                                           
 
-    #dh = (mjds[-1]-mjds[0]) # days
-    dh = (np.max(mjds)-np.min(mjds)) # days, need to take the np.max and np.min because images aren't necessarily in order of increase time.
-    drate = rate_fwhm_grid_step*seeing/dh  # 0.75 seems to be a good sweet spot
+    ang_steps_h = np.linspace(med_ang, max_ang+0.0, 150)
+    ang_steps_l = np.linspace(min_ang-0.0, med_ang, 150)
 
+    rx,ry = np.cos(ecl_ang*d2r)*np.min(np.array(rate_lims)), np.sin(ecl_ang*d2r)*np.min(np.array(rate_lims))
+    rates = [[rx, ry]]
 
-    dmjds = mjds-mjds[ref_im_ind]
-
-    ang_steps_h = np.linspace(med_ang, max_ang+0.0, 80)
-    ang_steps_l = np.linspace(min_ang-0.0, med_ang, 80)
-
-
-    rates = [[max_x, max_y]]
-    rx, ry = max_x, max_y
-    current_rate = (max_x**2+max_y**2)**0.5
-    while current_rate < (24*4.5/0.187):
-        n_x = np.cos(ang_steps_h)*current_rate# + max_x
-        n_y = np.sin(ang_steps_h)*current_rate# + max_y
+    current_rate = np.min(np.array(rate_lims))
+    while current_rate < 24*np.max(np.array(rate_lims))/pix_scale:
+        n_x = np.cos(ang_steps_h)*current_rate# + max_x                                                                                   
+        n_y = np.sin(ang_steps_h)*current_rate# + max_y                                                                                   
 
         dist_rates = ( ((n_x - n_x[0])**2 + (n_y - n_y[0])**2)**0.5 / drate).astype('int')
         unique_dist_rates = np.unique(dist_rates)
         for ind in unique_dist_rates:
             w = np.where(dist_rates == ind)
             rates.append([n_x[w[0][0]], n_y[w[0][0]]])
-            #pyl.scatter(rates[-1][0], rates[-1][1], alpha = 0.5, marker='s', s=70, c='r')
 
 
-        n_x = np.cos(ang_steps_l[::-1])*current_rate# + max_x
-        n_y = np.sin(ang_steps_l[::-1])*current_rate# + max_y
+        n_x = np.cos(ang_steps_l[::-1])*current_rate# + max_x                                                                             
+        n_y = np.sin(ang_steps_l[::-1])*current_rate# + max_y                                                                             
         dist_rates = (((n_x - n_x[0])**2 + (n_y - n_y[0])**2)**0.5 / drate).astype('int')
         unique_dist_rates = np.unique(dist_rates)
         for ind in unique_dist_rates:
             if ind == 0: continue
             w = np.where(dist_rates == ind)
             rates.append([n_x[w[0][0]], n_y[w[0][0]]])
-            #pyl.scatter(rates[-1][0], rates[-1][1], alpha = 0.5, marker='s', s=70, c='r')
 
         current_rate += drate
-    rates = np.array(rates)[1:]  ### the first rate is duplicated in the above algorithm
+
+    rates = np.array(rates)
+
     print('Number of rates:', len(rates))
-    
+
     if save_rates_figure:
-        sp = fig.add_subplot(212)
-        pyl.scatter(plant_rates[:, 0], plant_rates[:, 1],alpha=0.25, marker='.')#,  zorder = -1)
+        fig = pyl.figure(1)
+        sp = fig.add_subplot(111)
         pyl.scatter(rates[:,0], rates[:,1], alpha = 0.5, marker='s', s=70)
 
-        sp.grid(linestyle=':')
-        sp.set_xlim(sp.get_xlim()[0],0.0)
+        pyl.grid(linestyle=':')
 
         print('Saving Rates Figure.')
-        pyl.savefig('Rates_figure.png')
+        pyl.savefig('rates_figure.png')
         exit()
-        
-    if rots[chip]==0:
-        rates *= -1
 
-    return (rates, plant_rates)
+
+    return np.array(rates)
+
 
 
 def create_kernel(psfs, dmjds, rates, useNegativeWell=True, useGaussianKernel=False, kernel_width=14, im_nums=None, visit=None):

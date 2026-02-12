@@ -179,14 +179,19 @@ dmjds = mjds-mjds[ref_im_ind]
 
 
 ## choose the rates to perform shift-stack on.
-rates = []
-for rate in np.linspace(0.2, 0.3, 6):
-    for angle in np.linspace(-np.pi/2., np.pi/2., 6):
-        dx_ecl, dy_ecl = rate*np.cos(ecl_ang*np.pi/180.+angle), rate*np.sin(ecl_ang*np.pi/180.+angle)
-        rates.append([dx_ecl, dy_ecl])
-rates = np.array(rates, dtype='float16')*24./0.2
-print(rates, len(rates))
+#rates = []
+#for rate in np.linspace(0.2, 0.3, 6):
+#    for angle in np.linspace(-np.pi/2., np.pi/2., 6):
+#        dx_ecl, dy_ecl = rate*np.cos(ecl_ang*np.pi/180.+angle), rate*np.sin(ecl_ang*np.pi/180.+angle)
+#        rates.append([dx_ecl, dy_ecl])
+#rates = np.array(rates, dtype='float16')*24./0.2
+#print(rates, len(rates))
 
+rate_lims = [0.2, 0.4]
+ang_lims = [-45., 45.]
+pix_scale = 0.2
+fwhm = np.median(fwhm)
+rates = get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fwhm_grid_step, save_rates_figure=False)
 
 
 #(rates, plant_rates) = get_shift_rates(wcs, mjds, visit, chip, ref_im, ref_im_ind, warps_dir, fwhms, rate_fwhm_grid_step, A, B, save_rates_figure=args.save_rates_figure)
