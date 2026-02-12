@@ -402,6 +402,7 @@ clust_detections = clust_detections[w]
 clust_stamps = clust_stamps[w]
 print(len(clust_detections))
 logging.info(f'Number of sources kept after final SNR trim: {len(clust_detections)}.')
+print(f'Number of sources kept after final SNR trim: {len(clust_detections)}.')
 
 
 # In[15]:
