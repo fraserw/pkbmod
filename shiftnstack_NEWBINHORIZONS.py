@@ -160,6 +160,7 @@ w = np.where(np.isinf(np_inv_variances) | np.isnan(np_inv_variances))
 np_inv_variances[w] = 0.0
 np_datas[w] = 0.0
 
+
 datas = torch.tensor(np_datas).to(device)
 inv_variances = torch.tensor(np_inv_variances).to(device)
 
@@ -256,6 +257,8 @@ torch.cuda.empty_cache()
 # trim the flux negative sources
 detections = trim_negative_flux(detections)
 
+print(np.min(detections[:,4]), np.max(detections[:,4]), np.min(detections[:,5]), np.max(detections[:,5]))
+exit()
 
 # In[10]:
 
