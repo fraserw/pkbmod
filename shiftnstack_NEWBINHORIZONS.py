@@ -89,12 +89,6 @@ peak_offset_max = args.peak_offset_max ## the max allowable distance between sta
 
 variance_trim = args.variance_trim # the factor above the median variance at which we mask all pixels
 
-#bit_mask = {'BAD': 0, 'SAT': 1, 'INTRP': 2, 'EDGE': 4, 'DETECTED': 5,
-#                'DETECTED_NEGATIVE': 6, 'SUSPECT': 7, 'NO_DATA': 8, 'CROSSTALK': 9,
-#                'NOT_BLENDED': 10, 'UNMASKEDNAN': 11, 'BRIGHT_OBJECT': 12,
-#                'CLIPPED': 13, 'INEXACT_PSF': 14, 'REJECTED': 15,
-#                'SENSOR_EDGE': 16}
-#flag_keys= ['EDGE', 'NO_DATA', 'SAT', 'BAD', 'INTRP', 'BRIGHT_OBJECT']
 
 (bit_mask, flag_keys) = read_bitmask(args.bitmask, args.flagkeys)
 
@@ -266,7 +260,8 @@ for i in range(0, len(rates), n_rates_at_a_time):
         all_detections = np.array(detections)
     else:
         all_detections = np.concatenate([all_detections, detections])
-
+detections = all_detections
+"""
 # now sort on detections to keep only the best n_keep detections per pixel
 to_keep = []
 for y in range(A):
@@ -282,7 +277,7 @@ for y in range(A):
 to_keep = np.array(to_keep)
 
 detections = all_detections[to_keep]
-
+"""
 
 print(f'Kept {len(detections)} total detections.')
 
