@@ -117,8 +117,8 @@ def get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fw
 
         current_rate += drate
 
-    rates = np.array(rates)
-    #rates[:,0]*=-1.0
+    rates = np.array(rates)[1:] ## the first entry is duplicated
+
 
     print('Number of rates:', len(rates))
 
