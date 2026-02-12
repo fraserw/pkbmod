@@ -226,8 +226,7 @@ for ir in range(n_im):
 snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
 print('Done shifting')
 
-junk = np.array(snr_image[0,0,0].cpu()).astype('float')
-fits.writeto('junk.fits', junk, overwrite=True)
+fits.writeto('junk.fits', datas[0,0,0,:,:], overwrite=True)
 exit()
 
 # In[8]:
