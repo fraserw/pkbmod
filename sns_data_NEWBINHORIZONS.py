@@ -87,8 +87,7 @@ def get_shift_rates(ecl_ang, mjds, rate_lims, ang_lims, fwhm, pix_scale, rate_fw
     print(f'{seeing} pix.')
 
 
-    dh = (np.max(mjds)-np.min(mjds)) # days, need to take the np.max and np.min because images aren't necessarily in order of increase ti\
-me.                                                                                                                                       
+    dh = (np.max(mjds)-np.min(mjds)) # days, need to take the np.max and np.min because images aren't necessarily in order of increase time.                                                                                                                                       
     drate = rate_fwhm_grid_step*seeing/dh  # 0.75 seems to be a good sweet spot                                                           
 
     ang_steps_h = np.linspace(med_ang, max_ang+0.0, 150)
