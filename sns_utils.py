@@ -169,7 +169,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
         if exact_check:
             w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
         else:
-            w = np.where((np.isclose(detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(detections[i,3], rates[ir][1], rtol=inexact_rtol)))
+            w = np.where((np.isclose(detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(detections[:,3], rates[ir][1], rtol=inexact_rtol)))
         
         for id in range(1, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
