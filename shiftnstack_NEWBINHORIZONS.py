@@ -161,6 +161,9 @@ inv_variances = torch.tensor(np_inv_variances).to(device)
 mjds = np.array(mjds)
 im_nums = np.array(im_nums, dtype='int')
 
+fits.writeto('junk.fits', np_datas[0,0,0,:,:], overwrite=True)
+exit()
+
 mid_time = (mjds[-1]+mjds[0])/2.
 diff_times = mjds-mid_time
 ref_im_ind = np.argmin(np.abs(diff_times-mid_time))
@@ -226,8 +229,6 @@ for ir in range(n_im):
 snr_image, alpha_image = run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=False)
 print('Done shifting')
 
-fits.writeto('junk.fits', datas[0,0,0,:,:], overwrite=True)
-exit()
 
 # In[8]:
 
