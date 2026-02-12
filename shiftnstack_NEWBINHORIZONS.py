@@ -134,8 +134,7 @@ if args.read_from_params:
 
 (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path,  variance_trim, bit_mask, verbose=False)
 (A,B) = datas[0].shape
-print(A,B,datas[0].shape)
-exit()
+
 ecl_ang = calc_ecliptic_angle(wcs, A, B, retrograde=True)
 
 
@@ -241,6 +240,7 @@ b=sort_step
 while b<B:
     b = min(a+sort_step, B)
     print(f' Sorting {a} to {b} of {B}...', end=' ')
+    print(snr_image[:,:,:,:,a:b].shape, sort_inds.shape)
     sort_inds_wedge = torch.sort(snr_image[:,:,:,:,a:b].to(device), 2, descending=True)[1]
     sort_inds[:,:,:,:,a:b] = sort_inds_wedge[:,:,:4,:,:]
     a+=sort_step
