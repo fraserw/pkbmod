@@ -297,24 +297,13 @@ c[0,0,0] = im_datas[0,0,0]
 cv = torch.zeros_like(im_datas)
 cv[0,0,0] = inv_vars[0,0,0]
 
-keeps = brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-7)
-#keeps = np.arange(len(im_datas))
+keeps = brigtness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=False, inexact_rtol=1.e-7)
 
-#x_test, y_test = 160.475, 734.372
-#w = np.where(((detections[:,0] - x_test)**2 + (detections[:,1] - y_test)**2 )**0.5 < 8)
-#for i in w[0]:
-#    print(detections[i])
-#exit()
 
 print(len(keeps), len(detections))
 filt_detections = np.copy(detections[keeps])
 del keeps
-
-#x_test, y_test = 160.475, 734.372
-#w = np.where(((filt_detections[:,0] - x_test)**2 + (filt_detections[:,1] - y_test)**2 )**0.5 < 8)
-#for i in w[0]:
-#    print(filt_detections[i])
-#exit()
+print(filt_detections)
 
 
 # some cleanup
@@ -323,24 +312,24 @@ gc.collect()
 torch.cuda.empty_cache()
 
 
-#im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).cuda()
 im_masks = functional.pad(torch.tensor(np_masks), (khw, khw, khw, khw)).to(device)
 del np_masks
 
 # create the stamps
-mean_stamps = create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw)
+mean_stamps = create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw, exact_check=False, inexact_rtol=1.e-7)
 
 del im_masks
 gc.collect()
 torch.cuda.empty_cache()
 
-(z1,z2) = ZScaleInterval().get_limits(mean_stamps)
-normer = ManualInterval(z1,z2)
 
 stamps = mean_stamps
 
 show_test_stamps = False
 if show_test_stamps:
+    (z1,z2) = ZScaleInterval().get_limits(mean_stamps)
+    normer = ManualInterval(z1,z2)
+    
     args = np.argsort(filt_detections[:,5] )[::-1]
     for i in range(0):
         fig = pyl.figure()

@@ -151,7 +151,7 @@ def trim_negative_flux(detections):
     logging.info(f'Keeping {len(detections)} positive flux candidates')
     return detections
 
-def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=True, inexact_rtol=1.e-5):
+def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detections, khw, n_im, n_bright_test = 10, test_high = 1.15, test_low = 0.85, exact_check=True, inexact_rtol=1.e-7):
     nb_ref = torch.tensor(10.0**np.linspace(np.log10(test_low), np.log10(test_high), n_bright_test)).to(device)
 
     #with open('junk.txt', 'w+') as han:
@@ -213,7 +213,7 @@ def brightness_filter(im_datas, inv_vars, c, cv, kernel, dmjds, rates, detection
 
     return keeps
 
-def create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw):
+def create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw, exact_check=True, inexact_rtol=1.e-7):
     mean_stamps = []
     #med_stamps = []
     indices = []
@@ -224,8 +224,11 @@ def create_stamps(im_datas, im_masks, c, cv, dmjds, rates, filt_detections, khw)
         c[0,0,0] = im_datas[0,0,0]
         cv[0,0,0] = im_masks[0,0,0]
 
-        t1 = time.time()
-        w = np.where((filt_detections[:,2]==rates[ir][0]) & (filt_detections[:,3] == rates[ir][1]))
+        if exact_check:
+            w = np.where((detections[:,2]==rates[ir][0]) & (detections[:,3] == rates[ir][1]))
+        else:
+            w = np.where((np.isclose(detections[:,2], rates[ir][0], rtol=inexact_rtol)) & (np.isclose(detections[:,3], rates[ir][1], rtol=inexact_rtol)))
+
 
         for id in range(1, len(dmjds)):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
