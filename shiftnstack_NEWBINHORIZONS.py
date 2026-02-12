@@ -187,7 +187,7 @@ dmjds = mjds-mjds[ref_im_ind]
 #rates = np.array(rates, dtype='float16')*24./0.2
 #print(rates, len(rates))
 
-rate_lims = [0.2, 0.4]
+rate_lims = [0.2, 0.3]
 ang_lims = [-45., 45.]
 pix_scale = 0.2
 fwhm = np.median(fwhms)

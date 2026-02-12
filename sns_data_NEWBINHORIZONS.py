@@ -14,7 +14,8 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
 
     datas, masks, variances, mjds, psfs, fwhms, im_nums = [], [], [], [], [], [], []
     print(f'{image_path}/*_{patch_id}_*special*.repro')
-    fits_files = glob.glob(f'{image_path}/*_{patch_id}_*special*.repro')
+    #fits_files = glob.glob(f'{image_path}/*_{patch_id}_*special*.repro')
+    fits_files = glob.glob(f'{image_path}/*_{patch_id}_*.repro')
     
     indices = []
     for i in range(len(fits_files)):
@@ -31,7 +32,7 @@ def read_data(patch_id, image_path, variance_trim, bit_mask, verbose=False, var_
     else:
         print(f'Reading {len(fits_files)} files from {image_path}/')
 
-    for i in range(3):#len(fits_files)):
+    for i in range(10):#len(fits_files)):
         with fits.open(fits_files[i]) as han:
 
             datas.append(han[0].data)
