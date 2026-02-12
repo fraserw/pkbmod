@@ -52,6 +52,7 @@ parser.add_argument('--rt', action='store_true', default=False, help='Run on the
 parser.add_argument('--save-rates-figure', action='store_true', default=False)
 parser.add_argument('--bitmask', default='bitmask_NEWBINHORIZONS.dat', help='The bitmask to use with these data. Not yet reading from image headers. DEFAULT=%(default)s')
 parser.add_argument('--flagkeys', default='flagkeys_NEWBINHORIZONS.dat', help='The file containing the keys to mask. DEFAULT=%(default)s')
+parser.add_argument('--skip-predictive-filter', action='store_true', default=False)
 args = parser.parse_args()
 print(args)
 
@@ -381,7 +382,11 @@ if save_filt_detections:
         np.save(han, filt_detections)
 
 # apply predictive clustering
-clust_detections, clust_stamps = predictive_line_cluster(filt_detections, stamps, dmjds, dist_lim, min_samp, init_select_proc_distance=60, show_plot=False)
+if not args.skip_predictive_filter:
+    clust_detections, clust_stamps = predictive_line_cluster(filt_detections, stamps, dmjds, dist_lim, min_samp, init_select_proc_distance=60, show_plot=False)
+else:
+    clust_detections = filt_detections
+    clust_stamps = filt_stamps
 del stamps
 gc.collect()
 
