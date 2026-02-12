@@ -134,7 +134,8 @@ if args.read_from_params:
 
 (datas, masks, variances, mjds, psfs, fwhms, im_nums, wcs) = read_data(patch_id, image_path,  variance_trim, bit_mask, verbose=False)
 (A,B) = datas[0].shape
-
+print(A,B,datas.shape)
+exit()
 ecl_ang = calc_ecliptic_angle(wcs, A, B, retrograde=True)
 
 
