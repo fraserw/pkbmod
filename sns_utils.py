@@ -28,15 +28,14 @@ def run_shifts(datas, inv_variances, rates, dmjds, min_snr, writeTestImages=Fals
     alpha_image = torch.zeros((1,1,len(rates), datas.size()[3], datas.size()[4]), dtype=torch.float32)
 
 
-    rates=[[-30, 2.64]]
+    #rates=[[-30, 2.64]]
     for ir in range(len(rates)):
         for id in range(0, n_im):
             shifts = (-round(dmjds[id]*rates[ir][1]), -round(dmjds[id]*rates[ir][0]))
             c[0,0,id] = torch.roll(datas[0,0,id], shifts=shifts, dims=[0,1])
-            print(torch.argmax(torch.argmax(c[0,0,id], dim=0)), torch.argmax(torch.argmax(c[0,0,id], dim=1)))
+            #print(torch.argmax(torch.argmax(c[0,0,id], dim=0)), torch.argmax(torch.argmax(c[0,0,id], dim=1)))
             cv[0,0,id] = torch.roll(inv_variances[0,0,id], shifts=shifts, dims=[0,1])
-        print()
-        exit()
+
         #C = functional.conv3d(c, kernel)
         #sums = torch.sum(functional.conv3d(c, ones,padding='same'), 2)
 
